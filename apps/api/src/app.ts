@@ -1,5 +1,6 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { z } from "zod";
+import { enrichDashboard, getProtocolMarkets } from "./integrations/markets.js";
 import { MolqStrategyEngine } from "./strategy.js";
 
 const depositSchema = z.object({
@@ -23,23 +24,32 @@ export function createMolqServer(engine = new MolqStrategyEngine()) {
 			}
 
 			if (request.method === "GET" && request.url === "/api/dashboard") {
-				sendJson(response, 200, engine.getDashboard());
+				sendJson(response, 200, await enrichDashboard(engine.getDashboard()));
+				return;
+			}
+
+			if (request.method === "GET" && request.url === "/api/integrations/markets") {
+				sendJson(response, 200, await getProtocolMarkets());
 				return;
 			}
 
 			if (request.method === "POST" && request.url === "/api/deposit") {
 				const body = depositSchema.parse(await readJson(request));
-				sendJson(response, 200, engine.deposit(body.amount, body.riskMode));
+				sendJson(
+					response,
+					200,
+					await enrichDashboard(engine.deposit(body.amount, body.riskMode)),
+				);
 				return;
 			}
 
 			if (request.method === "POST" && request.url === "/api/cycle") {
-				sendJson(response, 200, engine.runCycle());
+				sendJson(response, 200, await enrichDashboard(engine.runCycle()));
 				return;
 			}
 
 			if (request.method === "POST" && request.url === "/api/reset") {
-				sendJson(response, 200, engine.reset());
+				sendJson(response, 200, await enrichDashboard(engine.reset()));
 				return;
 			}
 

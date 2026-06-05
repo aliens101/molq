@@ -26,6 +26,27 @@ beforeEach(() => {
 					riskScore: 28,
 					updatedAt: new Date().toISOString(),
 				},
+				shieldMarket: {
+					protocol: "INIT Capital",
+					market: "USDe",
+					poolAddress: "0x3282437C436eE6AA9861a6A46ab0822d82581b1c",
+					underlyingToken: "0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34",
+					supplyRateE18: "1700000000",
+					estimatedSupplyApy: 5.36,
+					availableLiquidity: "113455",
+					totalAssets: "139526",
+					status: "live",
+					updatedAt: new Date().toISOString(),
+				},
+				alphaMarket: {
+					protocol: "Bybit",
+					market: "ETHUSDT",
+					fundingRate: 0.00008,
+					estimatedFundingApy: 8.76,
+					markPrice: 3600,
+					status: "live",
+					updatedAt: new Date().toISOString(),
+				},
 				decisions: [],
 			}),
 		}),
@@ -37,4 +58,6 @@ test("renders the MolQ portfolio and deposit workflow", async () => {
 	expect(screen.getByText("Portfolio")).toBeInTheDocument();
 	expect(screen.getByRole("button", { name: /deposit and allocate/i })).toBeInTheDocument();
 	expect(await screen.findByText("11.40%")).toBeInTheDocument();
+	expect(screen.getByText("INIT Capital")).toBeInTheDocument();
+	expect(screen.getByText("Bybit")).toBeInTheDocument();
 });

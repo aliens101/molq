@@ -5,6 +5,7 @@ import {
 	ArrowDownToLine,
 	Bot,
 	CircleDollarSign,
+	ExternalLink,
 	RefreshCw,
 	ShieldCheck,
 	TrendingUp,
@@ -99,8 +100,14 @@ export default function App() {
 					</div>
 					<div className="flex items-center gap-3">
 						<div className="hidden items-center gap-2 text-xs text-zinc-400 sm:flex">
-							<span className="h-2 w-2 rounded-full bg-emerald-400" />
-							Mantle simulation
+							<span
+								className={`h-2 w-2 rounded-full ${
+									dashboard?.shieldMarket?.status === "live"
+										? "bg-emerald-400"
+										: "bg-amber-400"
+								}`}
+							/>
+							Mantle mainnet data
 						</div>
 						<Button size="sm">
 							<Wallet className="mr-2 h-4 w-4" />
@@ -292,6 +299,103 @@ export default function App() {
 				</section>
 
 				<section>
+					<div className="mb-3 flex items-end justify-between">
+						<div>
+							<h2 className="text-lg font-semibold">Execution venues</h2>
+							<p className="mt-1 text-xs text-zinc-500">
+								Market inputs used by the Shield and Alpha sleeves.
+							</p>
+						</div>
+						<div className="text-xs text-zinc-500">
+							Updated{" "}
+							{dashboard?.market.updatedAt
+								? new Date(dashboard.market.updatedAt).toLocaleTimeString()
+								: "--"}
+						</div>
+					</div>
+					<div className="grid border border-zinc-800 bg-zinc-900 lg:grid-cols-2">
+						<div className="border-b border-zinc-800 p-5 lg:border-b-0 lg:border-r">
+							<div className="flex items-start justify-between gap-4">
+								<div>
+									<div className="flex items-center gap-2">
+										<ShieldCheck className="h-4 w-4 text-emerald-400" />
+										<span className="text-sm font-medium">INIT Capital</span>
+										<Status status={dashboard?.shieldMarket?.status} />
+									</div>
+									<div className="mt-2 text-xs text-zinc-500">
+										USDe lending pool · Shield yield
+									</div>
+								</div>
+								<a
+									href={`https://mantlescan.xyz/address/${
+										dashboard?.shieldMarket?.poolAddress ??
+										"0x3282437C436eE6AA9861a6A46ab0822d82581b1c"
+									}`}
+									target="_blank"
+									rel="noreferrer"
+									className="text-zinc-500 transition-colors hover:text-emerald-400"
+									aria-label="Open INIT USDe pool on Mantlescan"
+								>
+									<ExternalLink className="h-4 w-4" />
+								</a>
+							</div>
+							<div className="mt-5 grid grid-cols-3 gap-3">
+								<Metric
+									label="Supply APY"
+									value={`${dashboard?.shieldMarket?.estimatedSupplyApy.toFixed(2) ?? "0.00"}%`}
+								/>
+								<Metric
+									label="Liquidity"
+									value={compactToken(
+										dashboard?.shieldMarket?.availableLiquidity,
+									)}
+								/>
+								<Metric
+									label="Market assets"
+									value={compactToken(dashboard?.shieldMarket?.totalAssets)}
+								/>
+							</div>
+						</div>
+
+						<div className="p-5">
+							<div className="flex items-start justify-between gap-4">
+								<div>
+									<div className="flex items-center gap-2">
+										<TrendingUp className="h-4 w-4 text-amber-400" />
+										<span className="text-sm font-medium">Bybit</span>
+										<Status status={dashboard?.alphaMarket?.status} />
+									</div>
+									<div className="mt-2 text-xs text-zinc-500">
+										ETHUSDT perpetual · Alpha hedge signal
+									</div>
+								</div>
+								<div className="font-mono text-xs text-zinc-500">8H</div>
+							</div>
+							<div className="mt-5 grid grid-cols-3 gap-3">
+								<Metric
+									label="Funding APY"
+									value={`${dashboard?.alphaMarket?.estimatedFundingApy.toFixed(2) ?? "0.00"}%`}
+								/>
+								<Metric
+									label="Funding rate"
+									value={`${(
+										(dashboard?.alphaMarket?.fundingRate ?? 0) * 100
+									).toFixed(4)}%`}
+								/>
+								<Metric
+									label="ETH mark"
+									value={
+										dashboard?.alphaMarket?.markPrice
+											? money(dashboard.alphaMarket.markPrice)
+											: "--"
+									}
+								/>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<section>
 					<Card className="rounded-md border-zinc-800 bg-zinc-900">
 						<CardHeader>
 							<CardTitle className="text-lg">Agent decisions</CardTitle>
@@ -341,6 +445,31 @@ function Metric({ label, value }: { label: string; value: string }) {
 			<div className="mt-1 text-sm font-medium">{value}</div>
 		</div>
 	);
+}
+
+function Status({ status }: { status?: "live" | "fallback" }) {
+	const live = status === "live";
+	return (
+		<span
+			className={`border px-1.5 py-0.5 font-mono text-[10px] uppercase ${
+				live ? "border-emerald-900 text-emerald-400" : "border-amber-900 text-amber-400"
+			}`}
+		>
+			{live ? "live" : "fallback"}
+		</span>
+	);
+}
+
+function compactToken(value?: string): string {
+	const amount = Number(value);
+	if (!Number.isFinite(amount) || amount === 0) {
+		return "--";
+	}
+
+	return `${new Intl.NumberFormat("en-US", {
+		notation: "compact",
+		maximumFractionDigits: 2,
+	}).format(amount)} USDe`;
 }
 
 function money(value: number): string {

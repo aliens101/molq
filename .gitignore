@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+dist
+**/dist
+.env
+.env.local
+.ponder
+**/.ponder
+.agents
+.claude
+contracts/cache
+contracts/out
+contracts/lib
+contracts/broadcast

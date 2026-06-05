@@ -1,0 +1,32 @@
+{
+	"name": "molq",
+	"private": true,
+	"version": "0.0.0",
+	"description": "MolQ — an AI-managed Mantle CeDeFi yield agent with on-chain decision logs.",
+	"packageManager": "pnpm@10.20.0",
+	"scripts": {
+		"dev": "pnpm --parallel --filter @molq/api --filter @molq/web dev",
+		"dev:all": "pnpm --parallel --filter @molq/api --filter @molq/web --filter @molq/indexer dev",
+		"api": "pnpm --filter @molq/api dev",
+		"api:build": "pnpm --filter @molq/api build",
+		"api:test": "pnpm --filter @molq/api test",
+		"indexer": "pnpm --filter @molq/indexer dev",
+		"indexer:start": "pnpm --filter @molq/indexer start",
+		"indexer:codegen": "pnpm --filter @molq/indexer codegen",
+		"indexer:typecheck": "pnpm --filter @molq/indexer typecheck",
+		"web": "pnpm --filter @molq/web dev",
+		"web:build": "pnpm --filter @molq/web build",
+		"web:test": "pnpm --filter @molq/web test --run",
+		"web:preview": "pnpm --filter @molq/web preview",
+		"contracts:build": "forge build --root contracts",
+		"contracts:test": "forge test --root contracts -vvv",
+		"contracts:fmt": "forge fmt --root contracts",
+		"build": "pnpm api:build && pnpm web:build && pnpm indexer:typecheck && pnpm contracts:build",
+		"test": "pnpm api:test && pnpm web:test && pnpm contracts:test",
+		"format": "prettier --write . && forge fmt --root contracts",
+		"format:check": "prettier --check . && forge fmt --root contracts --check"
+	},
+	"devDependencies": {
+		"prettier": "^3.3.3"
+	}
+}

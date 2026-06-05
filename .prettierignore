@@ -1,0 +1,22 @@
+# deps & generated
+node_modules
+**/node_modules
+.agents
+.claude
+**/dist
+**/build
+**/*.min.*
+pnpm-lock.yaml
+**/pnpm-lock.yaml
+
+# foundry libs/artifacts
+contracts/lib
+contracts/out
+contracts/cache
+
+# Ponder generated files
+apps/indexer/generated
+apps/indexer/ponder-env.d.ts
+
+# Solidity is formatted by forge fmt
+**/*.sol

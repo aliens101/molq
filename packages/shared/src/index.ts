@@ -46,6 +46,21 @@ export interface AlphaMarket {
 	updatedAt: string;
 }
 
+export interface HedgeExecutionStatus {
+	configured: boolean;
+	tradingEnabled: boolean;
+	venue: "Bybit";
+	symbol: "ETHUSDT";
+	targetNotionalUsd: number;
+	currentShortQuantity: number;
+	currentShortNotionalUsd: number;
+	accountEquityUsd: number;
+	unrealizedPnlUsd: number;
+	lastOrderId?: string;
+	lastReconciledAt?: string;
+	message: string;
+}
+
 export interface Portfolio {
 	balance: number;
 	deposited: number;
@@ -71,6 +86,7 @@ export interface DashboardResponse {
 	market: MarketSnapshot;
 	shieldMarket?: ShieldMarket;
 	alphaMarket?: AlphaMarket;
+	hedgeExecution?: HedgeExecutionStatus;
 	decisions: AgentDecision[];
 }
 

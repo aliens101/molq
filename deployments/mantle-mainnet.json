@@ -24,6 +24,13 @@
 			"blockNumber": 96392438,
 			"verified": true,
 			"explorerUrl": "https://mantlescan.xyz/address/0x626599904E04d8eED214740e39F380A4D5B0aDC3#code"
+		},
+		"initUsdeShieldReader": {
+			"address": "0x8EF74637d34bf98ea3F34502a512327aFC9789c3",
+			"transactionHash": "0x8b467b70391d7afe1396627c2d61489a107608e4743f96265e67346886c53acb",
+			"blockNumber": 96393267,
+			"verified": true,
+			"explorerUrl": "https://mantlescan.xyz/address/0x8EF74637d34bf98ea3F34502a512327aFC9789c3#code"
 		}
 	}
 }

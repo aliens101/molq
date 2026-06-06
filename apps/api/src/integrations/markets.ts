@@ -1,6 +1,6 @@
 import type { AlphaMarket, DashboardResponse, ShieldMarket } from "@molq/shared";
+import { getAaveFallbackMarket, getAaveUsdeMarket } from "./aave.js";
 import { getBybitEthMarket, getBybitFallbackMarket } from "./bybit.js";
-import { getInitFallbackMarket, getInitUsdeMarket } from "./init.js";
 
 export interface ProtocolMarkets {
 	shieldMarket: ShieldMarket;
@@ -9,7 +9,7 @@ export interface ProtocolMarkets {
 
 export async function getProtocolMarkets(): Promise<ProtocolMarkets> {
 	const [shieldMarket, alphaMarket] = await Promise.all([
-		getInitUsdeMarket().catch(() => getInitFallbackMarket()),
+		getAaveUsdeMarket().catch(() => getAaveFallbackMarket()),
 		getBybitEthMarket().catch(() => getBybitFallbackMarket()),
 	]);
 

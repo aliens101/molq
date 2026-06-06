@@ -42,6 +42,12 @@ export interface BybitInstrument {
 	};
 }
 
+export interface BybitTicker {
+	symbol: string;
+	markPrice: string;
+	fundingRate: string;
+}
+
 export interface CreateOrderRequest {
 	category: "linear";
 	symbol: string;
@@ -113,6 +119,18 @@ export class BybitClient {
 		const instrument = payload.result.list[0];
 		if (!instrument) throw new Error(`Bybit instrument ${symbol} was not found`);
 		return instrument;
+	}
+
+	async getTicker(symbol: string): Promise<BybitTicker> {
+		const query = new URLSearchParams({ category: "linear", symbol }).toString();
+		const response = await this.fetcher(`${this.baseUrl}/v5/market/tickers?${query}`, {
+			signal: AbortSignal.timeout(8_000),
+		});
+		const payload = (await response.json()) as BybitResponse<{ list: BybitTicker[] }>;
+		this.assertResponse(response, payload);
+		const ticker = payload.result.list[0];
+		if (!ticker) throw new Error(`Bybit ticker ${symbol} was not found`);
+		return ticker;
 	}
 
 	async setLeverage(symbol: string, leverage: string): Promise<void> {

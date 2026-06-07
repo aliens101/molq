@@ -3,6 +3,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { z } from "zod";
 import { getLiveDashboard } from "./dashboard.js";
 import { BybitHedgeExecutor } from "./execution/hedge-executor.js";
+import { VaultKeeper } from "./execution/vault-keeper.js";
 import { getProtocolMarkets } from "./integrations/markets.js";
 
 const reconcileSchema = z.object({
@@ -10,7 +11,10 @@ const reconcileSchema = z.object({
 	idempotencyKey: z.string().min(8).max(128),
 });
 
-export function createMolqServer(hedgeExecutor = BybitHedgeExecutor.fromEnv()) {
+export function createMolqServer(
+	hedgeExecutor = BybitHedgeExecutor.fromEnv(),
+	vaultKeeper = VaultKeeper.fromEnv(),
+) {
 	return createServer(async (request, response) => {
 		setCors(response);
 
@@ -45,6 +49,11 @@ export function createMolqServer(hedgeExecutor = BybitHedgeExecutor.fromEnv()) {
 				return;
 			}
 
+			if (request.method === "GET" && request.url === "/api/execution/vault") {
+				sendJson(response, 200, await vaultKeeper.status());
+				return;
+			}
+
 			if (request.method === "POST" && request.url === "/api/execution/hedge/reconcile") {
 				assertOperator(request);
 				const body = reconcileSchema.parse(await readJson(request));
@@ -53,6 +62,12 @@ export function createMolqServer(hedgeExecutor = BybitHedgeExecutor.fromEnv()) {
 					200,
 					await hedgeExecutor.reconcile(body.targetNotionalUsd, body.idempotencyKey),
 				);
+				return;
+			}
+
+			if (request.method === "POST" && request.url === "/api/execution/vault/rebalance") {
+				assertOperator(request);
+				sendJson(response, 200, await vaultKeeper.rebalance());
 				return;
 			}
 

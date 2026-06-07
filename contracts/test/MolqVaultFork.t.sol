@@ -4,19 +4,19 @@ pragma solidity ^0.8.28;
 import { Test } from "forge-std/Test.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IAavePool } from "../src/interfaces/IAavePool.sol";
-import { MolqVaultV2 } from "../src/MolqVaultV2.sol";
+import { MolqVault } from "../src/MolqVault.sol";
 
-contract MolqVaultV2ForkTest is Test {
+contract MolqVaultForkTest is Test {
     address private constant USDE = 0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34;
     address private constant AAVE_POOL = 0x458F293454fE0d67EC0655f3672301301DD51422;
     address private constant AAVE_USDE = 0xb9aCA933C9c0aa854a6DBb7b12f0CC3FdaC15ee7;
 
     address private user = address(0xBEEF);
-    MolqVaultV2 private vault;
+    MolqVault private vault;
 
     function setUp() public {
         vm.createSelectFork(vm.envOr("MANTLE_RPC_URL", string("https://rpc.mantle.xyz")));
-        vault = new MolqVaultV2({
+        vault = new MolqVault({
             asset_: IERC20(USDE),
             aavePool_: IAavePool(AAVE_POOL),
             aToken_: IERC20(AAVE_USDE),

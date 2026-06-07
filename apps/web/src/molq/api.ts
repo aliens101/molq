@@ -1,22 +1,7 @@
-import type { DashboardResponse, MolqRiskMode } from "@molq/shared";
+import type { DashboardResponse } from "@molq/shared";
 
 export async function getDashboard(): Promise<DashboardResponse> {
 	return request("/api/dashboard");
-}
-
-export async function deposit(amount: number, riskMode: MolqRiskMode): Promise<DashboardResponse> {
-	return request("/api/deposit", {
-		method: "POST",
-		body: JSON.stringify({ amount, riskMode }),
-	});
-}
-
-export async function runAgentCycle(): Promise<DashboardResponse> {
-	return request("/api/cycle", { method: "POST" });
-}
-
-export async function resetSimulation(): Promise<DashboardResponse> {
-	return request("/api/reset", { method: "POST" });
 }
 
 async function request(path: string, init?: RequestInit): Promise<DashboardResponse> {

@@ -4,13 +4,6 @@
 	"deployer": "0x3B4f0135465d444a5bD06Ab90fC59B73916C85F5",
 	"startBlock": 96392434,
 	"contracts": {
-		"mockUSDe": {
-			"address": "0x0A2BBe66B0A9987171De6c063FAeFd28Ccf9474D",
-			"transactionHash": "0xbe9d442a2db83ac185eabbb5bce92f8b41791560dde6463eba507c07d9411012",
-			"blockNumber": 96392434,
-			"verified": true,
-			"explorerUrl": "https://mantlescan.xyz/address/0x0A2BBe66B0A9987171De6c063FAeFd28Ccf9474D#code"
-		},
 		"decisionLogger": {
 			"address": "0xb6e5499C97138Ee6E25d1E904b6714BD0E60f139",
 			"transactionHash": "0xaf9de7cbf7f37a51339767a6e1393daf27cea9632aa1ca8b6dae66e889d41744",

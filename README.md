@@ -34,9 +34,8 @@ Ponder serves GraphQL and SQL APIs on its own local HTTP server.
 
 Public deployment metadata is stored in `deployments/mantle-mainnet.json`.
 
-- Mock USDe: `0x0A2BBe66B0A9987171De6c063FAeFd28Ccf9474D`
 - MolqDecisionLogger: `0xb6e5499C97138Ee6E25d1E904b6714BD0E60f139`
-- MolqVault: `0x626599904E04d8eED214740e39F380A4D5B0aDC3`
+- MolqVault: `0x71711F35c200fDabE75F2e82F0146c35f32eBAA5`
 - InitUsdeShieldReader: `0x8EF74637d34bf98ea3F34502a512327aFC9789c3`
 
 The reader is verified on Mantlescan and calls the live INIT Capital USDe lending pool:

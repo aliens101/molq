@@ -18,12 +18,19 @@
 			"verified": true,
 			"explorerUrl": "https://mantlescan.xyz/address/0xb6e5499C97138Ee6E25d1E904b6714BD0E60f139#code"
 		},
-		"vault": {
+		"legacyVault": {
 			"address": "0x626599904E04d8eED214740e39F380A4D5B0aDC3",
 			"transactionHash": "0xfbd99a6849964527c94d322de84e55eba2b0a179c98216053fb0fd5855ed7dff",
 			"blockNumber": 96392438,
 			"verified": true,
 			"explorerUrl": "https://mantlescan.xyz/address/0x626599904E04d8eED214740e39F380A4D5B0aDC3#code"
+		},
+		"vault": {
+			"address": "0x71711F35c200fDabE75F2e82F0146c35f32eBAA5",
+			"transactionHash": "0xd9b1f93dd44e760eb52d339cd33780389553af571e644945b0a50e79b6e701f0",
+			"blockNumber": 96421908,
+			"verified": true,
+			"explorerUrl": "https://mantlescan.xyz/address/0x71711F35c200fDabE75F2e82F0146c35f32eBAA5#code"
 		},
 		"initUsdeShieldReader": {
 			"address": "0x8EF74637d34bf98ea3F34502a512327aFC9789c3",

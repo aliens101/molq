@@ -1,24 +1,16 @@
 import { timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { z } from "zod";
+import { getLiveDashboard } from "./dashboard.js";
 import { BybitHedgeExecutor } from "./execution/hedge-executor.js";
-import { enrichDashboard, getProtocolMarkets } from "./integrations/markets.js";
-import { MolqStrategyEngine } from "./strategy.js";
-
-const depositSchema = z.object({
-	amount: z.number().positive().max(10_000_000),
-	riskMode: z.enum(["conservative", "balanced", "growth"]),
-});
+import { getProtocolMarkets } from "./integrations/markets.js";
 
 const reconcileSchema = z.object({
 	targetNotionalUsd: z.number().nonnegative(),
 	idempotencyKey: z.string().min(8).max(128),
 });
 
-export function createMolqServer(
-	engine = new MolqStrategyEngine(),
-	hedgeExecutor = BybitHedgeExecutor.fromEnv(),
-) {
+export function createMolqServer(hedgeExecutor = BybitHedgeExecutor.fromEnv()) {
 	return createServer(async (request, response) => {
 		setCors(response);
 
@@ -34,7 +26,7 @@ export function createMolqServer(
 			}
 
 			if (request.method === "GET" && request.url === "/api/dashboard") {
-				sendJson(response, 200, await withExecution(engine.getDashboard(), hedgeExecutor));
+				sendJson(response, 200, await withExecution(hedgeExecutor));
 				return;
 			}
 
@@ -64,26 +56,6 @@ export function createMolqServer(
 				return;
 			}
 
-			if (request.method === "POST" && request.url === "/api/deposit") {
-				const body = depositSchema.parse(await readJson(request));
-				sendJson(
-					response,
-					200,
-					await withExecution(engine.deposit(body.amount, body.riskMode), hedgeExecutor),
-				);
-				return;
-			}
-
-			if (request.method === "POST" && request.url === "/api/cycle") {
-				sendJson(response, 200, await withExecution(engine.runCycle(), hedgeExecutor));
-				return;
-			}
-
-			if (request.method === "POST" && request.url === "/api/reset") {
-				sendJson(response, 200, await withExecution(engine.reset(), hedgeExecutor));
-				return;
-			}
-
 			sendJson(response, 404, { error: "Not found" });
 		} catch (error) {
 			const message = error instanceof Error ? error.message : "Unexpected error";
@@ -98,14 +70,11 @@ function setCors(response: ServerResponse) {
 	response.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
 }
 
-async function withExecution(
-	dashboard: ReturnType<MolqStrategyEngine["getDashboard"]>,
-	hedgeExecutor: BybitHedgeExecutor,
-) {
-	const enriched = await enrichDashboard(dashboard);
+async function withExecution(hedgeExecutor: BybitHedgeExecutor) {
+	const dashboard = await getLiveDashboard();
 	return {
-		...enriched,
-		hedgeExecution: await hedgeExecutor.status(enriched.portfolio.alphaBalance),
+		...dashboard,
+		hedgeExecution: await hedgeExecutor.status(dashboard.portfolio.alphaBalance),
 	};
 }
 

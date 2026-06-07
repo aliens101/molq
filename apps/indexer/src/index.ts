@@ -1,5 +1,7 @@
 import { ponder } from "ponder:registry";
-import { agent, decision, vaultEvent, vaultSnapshot } from "ponder:schema";
+import { agent, decision, vaultAccount, vaultEvent, vaultSnapshot } from "ponder:schema";
+
+const zeroAddress = "0x0000000000000000000000000000000000000000";
 
 ponder.on("MolqDecisionLogger:AgentSet", async ({ event, context }) => {
 	await context.db
@@ -52,95 +54,146 @@ ponder.on("MolqDecisionLogger:DecisionLogged", async ({ event, context }) => {
 		}));
 });
 
-ponder.on("MolqVault:Deposited", async ({ event, context }) => {
-	await context.db.insert(vaultEvent).values({
-		id: eventKey(event),
+ponder.on("MolqVault:Deposit", async ({ event, context }) => {
+	await insertVaultEvent(context, event, {
 		type: "deposit",
-		user: event.args.user,
+		user: event.args.owner,
 		assets: event.args.assets,
 		shares: event.args.shares,
-		amount: null,
-		shieldBalance: null,
-		alphaBalance: null,
-		blockNumber: event.block.number,
-		blockTimestamp: event.block.timestamp,
-		transactionHash: event.transaction.hash,
-		logIndex: event.log.logIndex,
 	});
 });
 
-ponder.on("MolqVault:Withdrawn", async ({ event, context }) => {
-	await context.db.insert(vaultEvent).values({
-		id: eventKey(event),
+ponder.on("MolqVault:Withdraw", async ({ event, context }) => {
+	await insertVaultEvent(context, event, {
 		type: "withdraw",
-		user: event.args.user,
+		user: event.args.owner,
 		assets: event.args.assets,
 		shares: event.args.shares,
-		amount: null,
-		shieldBalance: null,
-		alphaBalance: null,
-		blockNumber: event.block.number,
-		blockTimestamp: event.block.timestamp,
-		transactionHash: event.transaction.hash,
-		logIndex: event.log.logIndex,
 	});
 });
 
-ponder.on("MolqVault:ProfitRecorded", async ({ event, context }) => {
-	await context.db.insert(vaultEvent).values({
-		id: eventKey(event),
-		type: "profit_recorded",
-		user: null,
-		assets: null,
-		shares: null,
-		amount: event.args.amount,
-		shieldBalance: null,
-		alphaBalance: null,
-		blockNumber: event.block.number,
-		blockTimestamp: event.block.timestamp,
-		transactionHash: event.transaction.hash,
-		logIndex: event.log.logIndex,
+ponder.on("MolqVault:Transfer", async ({ event, context }) => {
+	if (event.args.from !== zeroAddress) {
+		await context.db
+			.insert(vaultAccount)
+			.values({
+				address: event.args.from,
+				shares: 0n,
+				updatedAt: event.block.timestamp,
+			})
+			.onConflictDoUpdate((row) => ({
+				shares: row.shares - event.args.value,
+				updatedAt: event.block.timestamp,
+			}));
+	}
+
+	if (event.args.to !== zeroAddress) {
+		await context.db
+			.insert(vaultAccount)
+			.values({
+				address: event.args.to,
+				shares: event.args.value,
+				updatedAt: event.block.timestamp,
+			})
+			.onConflictDoUpdate((row) => ({
+				shares: row.shares + event.args.value,
+				updatedAt: event.block.timestamp,
+			}));
+	}
+});
+
+ponder.on("MolqVault:ShieldInvested", async ({ event, context }) => {
+	await insertVaultEvent(context, event, {
+		type: "shield_invested",
+		amount: event.args.assets,
 	});
 });
 
-ponder.on("MolqVault:BucketsUpdated", async ({ event, context }) => {
-	const totalAssets = event.args.shieldBalance + event.args.alphaBalance;
-
-	await context.db.insert(vaultEvent).values({
-		id: eventKey(event),
-		type: "buckets_updated",
-		user: null,
-		assets: null,
-		shares: null,
-		amount: null,
-		shieldBalance: event.args.shieldBalance,
-		alphaBalance: event.args.alphaBalance,
-		blockNumber: event.block.number,
-		blockTimestamp: event.block.timestamp,
-		transactionHash: event.transaction.hash,
-		logIndex: event.log.logIndex,
+ponder.on("MolqVault:ShieldRedeemed", async ({ event, context }) => {
+	await insertVaultEvent(context, event, {
+		type: "shield_redeemed",
+		amount: event.args.assets,
 	});
+});
 
+ponder.on("MolqVault:Rebalanced", async ({ event, context }) => {
+	const totalAssets = event.args.shieldAssets + event.args.liquidAssets;
+	await insertVaultEvent(context, event, {
+		type: "rebalanced",
+		shieldBalance: event.args.shieldAssets,
+		alphaBalance: event.args.liquidAssets,
+	});
 	await context.db
 		.insert(vaultSnapshot)
 		.values({
 			id: "latest",
-			shieldBalance: event.args.shieldBalance,
-			alphaBalance: event.args.alphaBalance,
+			shieldBalance: event.args.shieldAssets,
+			alphaBalance: event.args.liquidAssets,
 			totalAssets,
 			blockNumber: event.block.number,
 			blockTimestamp: event.block.timestamp,
 			transactionHash: event.transaction.hash,
 		})
 		.onConflictDoUpdate({
-			shieldBalance: event.args.shieldBalance,
-			alphaBalance: event.args.alphaBalance,
+			shieldBalance: event.args.shieldAssets,
+			alphaBalance: event.args.liquidAssets,
 			totalAssets,
 			blockNumber: event.block.number,
 			blockTimestamp: event.block.timestamp,
 			transactionHash: event.transaction.hash,
 		});
 });
+
+ponder.on("MolqVault:EmergencyExit", async ({ event, context }) => {
+	await insertVaultEvent(context, event, {
+		type: "emergency_exit",
+		assets: event.args.assets,
+		shares: event.args.shares,
+	});
+});
+
+ponder.on("MolqVault:KeeperUpdated", async ({ event, context }) => {
+	await insertVaultEvent(context, event, {
+		type: "keeper_updated",
+		user: event.args.newKeeper,
+	});
+});
+
+ponder.on("MolqVault:ShieldTargetUpdated", async ({ event, context }) => {
+	await insertVaultEvent(context, event, {
+		type: "shield_target_updated",
+		amount: event.args.newTargetBps,
+	});
+});
+
+async function insertVaultEvent(
+	context: Parameters<Parameters<typeof ponder.on>[1]>[0]["context"],
+	event: Parameters<Parameters<typeof ponder.on>[1]>[0]["event"],
+	values: {
+		type: string;
+		user?: `0x${string}`;
+		assets?: bigint;
+		shares?: bigint;
+		amount?: bigint;
+		shieldBalance?: bigint;
+		alphaBalance?: bigint;
+	},
+) {
+	await context.db.insert(vaultEvent).values({
+		id: eventKey(event),
+		type: values.type,
+		user: values.user ?? null,
+		assets: values.assets ?? null,
+		shares: values.shares ?? null,
+		amount: values.amount ?? null,
+		shieldBalance: values.shieldBalance ?? null,
+		alphaBalance: values.alphaBalance ?? null,
+		blockNumber: event.block.number,
+		blockTimestamp: event.block.timestamp,
+		transactionHash: event.transaction.hash,
+		logIndex: event.log.logIndex,
+	});
+}
 
 function eventKey(event: { transaction: { hash: string }; log: { logIndex: number } }) {
 	return `${event.transaction.hash}-${event.log.logIndex}`;

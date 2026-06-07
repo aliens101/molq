@@ -38,6 +38,12 @@ export const vaultEvent = onchainTable("vault_event", (t) => ({
 	logIndex: t.integer().notNull(),
 }));
 
+export const vaultAccount = onchainTable("vault_account", (t) => ({
+	address: t.hex().primaryKey(),
+	shares: t.bigint().notNull(),
+	updatedAt: t.bigint().notNull(),
+}));
+
 export const vaultSnapshot = onchainTable("vault_snapshot", (t) => ({
 	id: t.text().primaryKey(),
 	shieldBalance: t.bigint().notNull(),

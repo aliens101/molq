@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { AgentRuntime } from "./agent/runtime.js";
 import { createMolqServer } from "./app.js";
 import { BybitHedgeExecutor } from "./execution/hedge-executor.js";

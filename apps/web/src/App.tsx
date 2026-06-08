@@ -64,7 +64,7 @@ export default function App() {
 							<div className="font-bold">MolQ</div>
 						</div>
 						<div className="hidden items-center gap-2 text-xs text-label-secondary lg:flex">
-							<span className="h-2 w-2 rounded-full bg-positive" />
+							<img src="/images/mantle.svg" alt="" className="h-4 w-4 rounded-full" />
 							Mantle mainnet
 						</div>
 						<WalletControl vault={vault} />

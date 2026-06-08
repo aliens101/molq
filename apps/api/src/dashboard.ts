@@ -21,8 +21,7 @@ export async function getLiveDashboard(): Promise<DashboardResponse> {
 			estimatedNetApy,
 			hedgeRatio: 0,
 			liquidityScore:
-				markets.shieldMarket.status === "live" &&
-				markets.alphaMarket.status === "live"
+				markets.shieldMarket.status === "live" && markets.alphaMarket.status === "live"
 					? 100
 					: 50,
 			riskScore: markets.shieldMarket.status === "live" ? 25 : 75,

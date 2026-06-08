@@ -1,9 +1,4 @@
-import {
-	MANTLE_CHAIN_ID,
-	MANTLE_RPC_URL,
-	MOLQ_VAULT,
-	type Portfolio,
-} from "@molq/shared";
+import { MANTLE_CHAIN_ID, MANTLE_RPC_URL, MOLQ_VAULT, type Portfolio } from "@molq/shared";
 import { createPublicClient, formatUnits, http, type PublicClient } from "viem";
 import { mantle } from "viem/chains";
 

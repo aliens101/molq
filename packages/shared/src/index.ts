@@ -10,6 +10,8 @@ export const AAVE_MANTLE_DATA_PROVIDER = "0x487c5c669D9eee6057C44973207101276cf7
 export const AAVE_MANTLE_USDE_ATOKEN = "0xb9aCA933C9c0aa854a6DBb7b12f0CC3FdaC15ee7";
 export const MANTLE_USDE = "0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34";
 export const MOLQ_VAULT = "0x71711F35c200fDabE75F2e82F0146c35f32eBAA5";
+export const MOLQ_DECISION_LOGGER = "0xb6e5499C97138Ee6E25d1E904b6714BD0E60f139";
+export const ERC8004_IDENTITY_REGISTRY = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432";
 
 export type MolqRiskMode = "conservative" | "balanced" | "growth";
 
@@ -78,12 +80,50 @@ export interface Portfolio {
 
 export interface AgentDecision {
 	id: string;
-	action: "deposit" | "allocate" | "harvest" | "harden" | "hold";
+	action:
+		| "deposit"
+		| "allocate"
+		| "harvest"
+		| "harden"
+		| "hold"
+		| "rebalance"
+		| "hedge"
+		| "rebalance_and_hedge";
 	amount: number;
 	riskScore: number;
 	reason: string;
 	createdAt: string;
 	txHash?: string;
+}
+
+export type AgentAction = "hold" | "rebalance" | "hedge" | "rebalance_and_hedge";
+export type AgentDecisionSource = "model" | "deterministic";
+
+export interface AgentPolicySnapshot {
+	totalAssetsUsd: number;
+	shieldAssetsUsd: number;
+	liquidAssetsUsd: number;
+	targetShieldAssetsUsd: number;
+	currentHedgeNotionalUsd: number;
+	aaveSupplyApy: number;
+	bybitFundingApy: number;
+	liquidityScore: number;
+	marketRiskScore: number;
+	shieldMarketLive: boolean;
+	alphaMarketLive: boolean;
+}
+
+export interface AgentPolicyDecision {
+	id: string;
+	action: AgentAction;
+	targetHedgeNotionalUsd: number;
+	confidence: number;
+	riskScore: number;
+	reason: string;
+	source: AgentDecisionSource;
+	model?: string;
+	safetyChecks: string[];
+	createdAt: string;
 }
 
 export interface DashboardResponse {

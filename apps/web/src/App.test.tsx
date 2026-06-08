@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, expect, test, vi } from "vitest";
 import App from "./App";
 
@@ -92,8 +92,12 @@ beforeEach(() => {
 
 test("renders the MolQ portfolio and deposit workflow", async () => {
 	render(<App />);
-	expect(screen.getByRole("heading", { name: "Vault" })).toBeInTheDocument();
+	expect(screen.getByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
+	expect(screen.getByRole("link", { name: /open deposit/i })).toBeInTheDocument();
+	expect((await screen.findAllByText("0.00%")).length).toBeGreaterThan(0);
+
+	fireEvent.click(screen.getAllByRole("link", { name: "Deposit" })[0]);
+	expect(screen.getByRole("heading", { name: "Deposit" })).toBeInTheDocument();
 	expect(screen.getAllByRole("button", { name: /connect wallet/i })).toHaveLength(2);
-	expect(await screen.findByText("Aave V3")).toBeInTheDocument();
-	expect(screen.getByText("Bybit")).toBeInTheDocument();
+	expect(screen.getByRole("button", { name: /withdraw full position/i })).toBeDisabled();
 });

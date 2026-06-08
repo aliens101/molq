@@ -1,5 +1,5 @@
 import type { DashboardResponse } from "@molq/shared";
-import { ExternalLink, ShieldCheck, TrendingUp } from "lucide-react";
+import { ExternalLink, ShieldCheck } from "lucide-react";
 import { AAVE_USDE } from "@/molq/contracts";
 
 export function ExecutionTable({ dashboard }: { dashboard: DashboardResponse | null }) {
@@ -8,7 +8,7 @@ export function ExecutionTable({ dashboard }: { dashboard: DashboardResponse | n
 			name: dashboard?.shieldMarket?.protocol ?? "Aave V3",
 			market: "USDe supply",
 			icon: ShieldCheck,
-			token: true,
+			image: "/images/usde.png",
 			accent: "text-label-accent",
 			yield: `${dashboard?.shieldMarket?.estimatedSupplyApy.toFixed(2) ?? "0.00"}%`,
 			exposure: compactToken(dashboard?.shieldMarket?.totalAssets),
@@ -18,8 +18,8 @@ export function ExecutionTable({ dashboard }: { dashboard: DashboardResponse | n
 		{
 			name: "Bybit",
 			market: "ETHUSDT perpetual",
-			icon: TrendingUp,
-			token: false,
+			icon: ShieldCheck,
+			image: "/images/bybit.svg",
 			accent: "text-orange",
 			yield: `${dashboard?.alphaMarket?.estimatedFundingApy.toFixed(2) ?? "0.00"}%`,
 			exposure: money(dashboard?.hedgeExecution?.currentShortNotionalUsd ?? 0),
@@ -58,7 +58,7 @@ export function ExecutionTable({ dashboard }: { dashboard: DashboardResponse | n
 						name,
 						market,
 						icon: Icon,
-						token,
+						image,
 						accent,
 						yield: rate,
 						exposure,
@@ -71,11 +71,11 @@ export function ExecutionTable({ dashboard }: { dashboard: DashboardResponse | n
 						>
 							<div className="flex items-center gap-3">
 								<div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-fill-quaternary">
-									{token ? (
+									{image ? (
 										<img
-											src="/images/usde.png"
+											src={image}
 											alt=""
-											className="h-7 w-7 object-contain"
+											className="h-7 w-7 rounded-md object-contain"
 										/>
 									) : (
 										<Icon className={`h-5 w-5 ${accent}`} />

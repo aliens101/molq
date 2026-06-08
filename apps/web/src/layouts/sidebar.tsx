@@ -1,16 +1,17 @@
 import { Activity, ExternalLink, LayoutDashboard, ShieldCheck, WalletCards } from "lucide-react";
+import { NavLink } from "react-router-dom";
 import { MOLQ_VAULT } from "@/molq/contracts";
 
 const items = [
-	{ label: "Overview", icon: LayoutDashboard, href: "#overview" },
-	{ label: "Position", icon: WalletCards, href: "#position" },
-	{ label: "Execution", icon: Activity, href: "#execution" },
+	{ to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
+	{ to: "/deposit", label: "Deposit", icon: WalletCards },
+	{ to: "/execution", label: "Execution", icon: Activity },
 ];
 
 export function Sidebar() {
 	return (
-		<aside className="hidden min-h-screen w-[224px] shrink-0 border-r border-border-edge bg-card px-4 py-5 lg:flex lg:flex-col">
-			<div className="flex items-center gap-3 px-2">
+		<aside className="sticky top-0 hidden h-screen w-[224px] shrink-0 self-start overflow-hidden border-r border-border-edge bg-card px-4 py-5 lg:flex lg:flex-col">
+			<NavLink to="/" className="flex items-center gap-3 px-2">
 				<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-fill-accent-primary font-bold text-label-on-light">
 					MQ
 				</div>
@@ -18,26 +19,29 @@ export function Sidebar() {
 					<div className="text-lg font-bold">MolQ</div>
 					<div className="text-xs text-label-secondary">Mantle mainnet</div>
 				</div>
-			</div>
+			</NavLink>
 
-			<nav className="mt-10 space-y-1">
-				{items.map(({ label, icon: Icon, href }, index) => (
-					<a
-						key={label}
-						href={href}
-						className={`flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition-colors ${
-							index === 0
-								? "bg-fill-accent-secondary text-label-accent"
-								: "text-label-secondary hover:bg-fill-quaternary hover:text-foreground"
-						}`}
+			<nav className="mt-10 min-h-0 flex-1 space-y-1 overflow-y-auto">
+				{items.map(({ to, label, icon: Icon, end }) => (
+					<NavLink
+						key={to}
+						to={to}
+						end={end}
+						className={({ isActive }) =>
+							`flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition-colors ${
+								isActive
+									? "bg-fill-accent-secondary text-label-accent"
+									: "text-label-secondary hover:bg-fill-quaternary hover:text-foreground"
+							}`
+						}
 					>
 						<Icon className="h-4 w-4" />
 						{label}
-					</a>
+					</NavLink>
 				))}
 			</nav>
 
-			<div className="mt-auto rounded-xl border border-border-edge bg-fill-quaternary p-4">
+			<div className="mt-4 shrink-0 rounded-xl border border-border-edge bg-fill-quaternary p-4">
 				<div className="flex items-center gap-2 text-sm font-bold">
 					<ShieldCheck className="h-4 w-4 text-label-accent" />
 					Verified vault

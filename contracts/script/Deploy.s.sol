@@ -15,6 +15,7 @@ contract Deploy is Script {
         uint256 privateKey = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(privateKey);
         address keeper = vm.envOr("KEEPER", deployer);
+        address treasury = vm.envOr("TREASURY", deployer);
 
         vm.startBroadcast(privateKey);
         MolqVault vault = new MolqVault({
@@ -23,12 +24,16 @@ contract Deploy is Script {
             aToken_: IERC20(AAVE_USDE),
             owner_: deployer,
             keeper_: keeper,
-            shieldTargetBps_: 8500
+            shieldTargetBps_: 8500,
+            treasury_: treasury,
+            performanceFeeBps_: 1000
         });
         vm.stopBroadcast();
 
         console2.log("MolqVault:", address(vault));
         console2.log("Owner:", deployer);
         console2.log("Keeper:", keeper);
+        console2.log("Treasury:", treasury);
+        console2.log("Performance fee (bps):", 1000);
     }
 }

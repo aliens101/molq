@@ -16,6 +16,7 @@ contract MolqVaultTest is Test {
 
     address private user = address(0xBEEF);
     address private keeper = address(0xCAFE);
+    address private treasury = address(0xFEE);
 
     function setUp() public {
         asset = new MockERC20();
@@ -27,7 +28,9 @@ contract MolqVaultTest is Test {
             aToken_: IERC20(address(aToken)),
             owner_: address(this),
             keeper_: keeper,
-            shieldTargetBps_: 8500
+            shieldTargetBps_: 8500,
+            treasury_: treasury,
+            performanceFeeBps_: 1000
         });
 
         asset.mint(user, 1000 ether);
@@ -67,6 +70,36 @@ contract MolqVaultTest is Test {
 
         assertEq(vault.totalAssets(), 1085 ether);
         assertApproxEqAbs(vault.convertToAssets(1000 ether), 1085 ether, 1);
+    }
+
+    function testHardenedProfitChargesFeeAndIncreasesShareValue() public {
+        vm.prank(user);
+        vault.deposit(1000 ether, user);
+        asset.mint(keeper, 100 ether);
+        vm.prank(keeper);
+        asset.approve(address(vault), 100 ether);
+
+        vm.prank(keeper);
+        vault.hardenProfit(100 ether);
+
+        assertEq(asset.balanceOf(treasury), 10 ether);
+        assertEq(vault.totalAssets(), 1090 ether);
+        assertApproxEqAbs(vault.convertToAssets(1000 ether), 1090 ether, 1);
+        assertEq(vault.shieldAssets(), 926.5 ether);
+        assertEq(vault.liquidAssets(), 163.5 ether);
+    }
+
+    function testPrincipalDepositsDoNotPayPerformanceFee() public {
+        vm.prank(user);
+        vault.deposit(1000 ether, user);
+
+        assertEq(asset.balanceOf(treasury), 0);
+        assertEq(vault.totalAssets(), 1000 ether);
+    }
+
+    function testPerformanceFeeCannotExceedTwentyPercent() public {
+        vm.expectRevert(MolqVault.InvalidFee.selector);
+        vault.setPerformanceFee(2001);
     }
 
     function testKeeperCanRebalanceToUpdatedTarget() public {

@@ -15,16 +15,22 @@ contract MolqVault is ERC4626, Ownable2Step, Pausable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     uint256 public constant BPS = 10_000;
+    uint256 public constant MAX_PERFORMANCE_FEE_BPS = 2000;
     uint256 public constant AAVE_ROUNDING_TOLERANCE = 10;
 
     IAavePool public immutable AAVE_POOL;
     IERC20 public immutable A_TOKEN;
 
     address public keeper;
+    address public treasury;
     uint256 public shieldTargetBps;
+    uint256 public performanceFeeBps;
 
     event KeeperUpdated(address indexed previousKeeper, address indexed newKeeper);
     event ShieldTargetUpdated(uint256 previousTargetBps, uint256 newTargetBps);
+    event TreasuryUpdated(address indexed previousTreasury, address indexed newTreasury);
+    event PerformanceFeeUpdated(uint256 previousFeeBps, uint256 newFeeBps);
+    event ProfitHardened(uint256 grossProfit, uint256 feeAssets, uint256 netProfit);
     event ShieldInvested(uint256 assets);
     event ShieldRedeemed(uint256 assets);
     event Rebalanced(uint256 shieldAssets, uint256 liquidAssets);
@@ -33,6 +39,8 @@ contract MolqVault is ERC4626, Ownable2Step, Pausable, ReentrancyGuard {
     error NotKeeper();
     error InvalidAddress();
     error InvalidTarget();
+    error InvalidFee();
+    error ZeroAmount();
     error SlippageExceeded();
     error InsufficientAaveLiquidity();
 
@@ -42,17 +50,25 @@ contract MolqVault is ERC4626, Ownable2Step, Pausable, ReentrancyGuard {
         IERC20 aToken_,
         address owner_,
         address keeper_,
-        uint256 shieldTargetBps_
+        uint256 shieldTargetBps_,
+        address treasury_,
+        uint256 performanceFeeBps_
     ) ERC20("MolQ USDe Vault", "mqUSDe") ERC4626(asset_) Ownable(owner_) {
-        if (address(aavePool_) == address(0) || address(aToken_) == address(0) || keeper_ == address(0)) {
+        if (
+            address(aavePool_) == address(0) || address(aToken_) == address(0) || keeper_ == address(0)
+                || treasury_ == address(0)
+        ) {
             revert InvalidAddress();
         }
         if (shieldTargetBps_ > BPS) revert InvalidTarget();
+        if (performanceFeeBps_ > MAX_PERFORMANCE_FEE_BPS) revert InvalidFee();
 
         AAVE_POOL = aavePool_;
         A_TOKEN = aToken_;
         keeper = keeper_;
+        treasury = treasury_;
         shieldTargetBps = shieldTargetBps_;
+        performanceFeeBps = performanceFeeBps_;
         _approveAsset(asset_, address(aavePool_), type(uint256).max);
     }
 
@@ -90,6 +106,18 @@ contract MolqVault is ERC4626, Ownable2Step, Pausable, ReentrancyGuard {
         shieldTargetBps = newTargetBps;
     }
 
+    function setTreasury(address newTreasury) external onlyOwner {
+        if (newTreasury == address(0)) revert InvalidAddress();
+        emit TreasuryUpdated(treasury, newTreasury);
+        treasury = newTreasury;
+    }
+
+    function setPerformanceFee(uint256 newFeeBps) external onlyOwner {
+        if (newFeeBps > MAX_PERFORMANCE_FEE_BPS) revert InvalidFee();
+        emit PerformanceFeeUpdated(performanceFeeBps, newFeeBps);
+        performanceFeeBps = newFeeBps;
+    }
+
     function pause() external onlyOwner {
         _pause();
     }
@@ -99,6 +127,23 @@ contract MolqVault is ERC4626, Ownable2Step, Pausable, ReentrancyGuard {
     }
 
     function rebalance(uint256 minAssetsOut) external onlyKeeper nonReentrant whenNotPaused {
+        _rebalance(minAssetsOut);
+    }
+
+    function hardenProfit(uint256 grossProfit) external onlyKeeper nonReentrant whenNotPaused {
+        if (grossProfit == 0) revert ZeroAmount();
+
+        IERC20 assetToken = IERC20(asset());
+        assetToken.safeTransferFrom(msg.sender, address(this), grossProfit);
+        uint256 feeAssets = (grossProfit * performanceFeeBps) / BPS;
+        uint256 netProfit = grossProfit - feeAssets;
+        if (feeAssets > 0) assetToken.safeTransfer(treasury, feeAssets);
+
+        _rebalance(0);
+        emit ProfitHardened(grossProfit, feeAssets, netProfit);
+    }
+
+    function _rebalance(uint256 minAssetsOut) internal {
         uint256 total = totalAssets();
         uint256 desiredShield = (total * shieldTargetBps) / BPS;
         uint256 currentShield = shieldAssets();

@@ -22,7 +22,9 @@ contract MolqVaultForkTest is Test {
             aToken_: IERC20(AAVE_USDE),
             owner_: address(this),
             keeper_: address(this),
-            shieldTargetBps_: 8500
+            shieldTargetBps_: 8500,
+            treasury_: address(this),
+            performanceFeeBps_: 1000
         });
 
         deal(USDE, user, 100 ether);

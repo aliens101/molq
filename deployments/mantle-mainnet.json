@@ -4,6 +4,14 @@
 	"deployer": "0x3B4f0135465d444a5bD06Ab90fC59B73916C85F5",
 	"startBlock": 96392434,
 	"contracts": {
+		"agentIdentity": {
+			"registry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
+			"agentId": 112,
+			"registrationTransactionHash": "0x8326b8f582e2a5a78e5f309a22e58b232651f578836741eb011e85f2345a554f",
+			"uriTransactionHash": "0xf5aeb2a5b6d099b7a93e08f16862bbe5898ad8f24eac1f4aaddfd282ba8bba21",
+			"blockNumber": 96423301,
+			"explorerUrl": "https://mantlescan.xyz/token/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432?a=112"
+		},
 		"decisionLogger": {
 			"address": "0xb6e5499C97138Ee6E25d1E904b6714BD0E60f139",
 			"transactionHash": "0xaf9de7cbf7f37a51339767a6e1393daf27cea9632aa1ca8b6dae66e889d41744",

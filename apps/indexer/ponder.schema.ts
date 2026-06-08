@@ -1,5 +1,14 @@
 import { onchainTable } from "ponder";
 
+export const agentIdentity = onchainTable("agent_identity", (t) => ({
+	agentId: t.bigint().primaryKey(),
+	owner: t.hex().notNull(),
+	agentUri: t.text().notNull(),
+	registeredAt: t.bigint().notNull(),
+	updatedAt: t.bigint().notNull(),
+	transactionHash: t.hex().notNull(),
+}));
+
 export const agent = onchainTable("agent", (t) => ({
 	address: t.hex().primaryKey(),
 	allowed: t.boolean().notNull(),

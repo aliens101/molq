@@ -1,7 +1,49 @@
 import { ponder } from "ponder:registry";
-import { agent, decision, vaultAccount, vaultEvent, vaultSnapshot } from "ponder:schema";
+import {
+	agent,
+	agentIdentity,
+	decision,
+	vaultAccount,
+	vaultEvent,
+	vaultSnapshot,
+} from "ponder:schema";
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
+const molqAgentId = 112n;
+
+ponder.on("IdentityRegistry:Registered", async ({ event, context }) => {
+	if (event.args.agentId !== molqAgentId) return;
+
+	await context.db.insert(agentIdentity).values({
+		agentId: event.args.agentId,
+		owner: event.args.owner,
+		agentUri: event.args.agentURI,
+		registeredAt: event.block.timestamp,
+		updatedAt: event.block.timestamp,
+		transactionHash: event.transaction.hash,
+	});
+});
+
+ponder.on("IdentityRegistry:URIUpdated", async ({ event, context }) => {
+	if (event.args.agentId !== molqAgentId) return;
+
+	await context.db
+		.insert(agentIdentity)
+		.values({
+			agentId: event.args.agentId,
+			owner: event.args.updatedBy,
+			agentUri: event.args.newURI,
+			registeredAt: event.block.timestamp,
+			updatedAt: event.block.timestamp,
+			transactionHash: event.transaction.hash,
+		})
+		.onConflictDoUpdate((row) => ({
+			...row,
+			agentUri: event.args.newURI,
+			updatedAt: event.block.timestamp,
+			transactionHash: event.transaction.hash,
+		}));
+});
 
 ponder.on("MolqDecisionLogger:AgentSet", async ({ event, context }) => {
 	await context.db

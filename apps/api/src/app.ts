@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { z } from "zod";
+import { AgentRuntime } from "./agent/runtime.js";
 import { getLiveDashboard } from "./dashboard.js";
 import { BybitHedgeExecutor } from "./execution/hedge-executor.js";
 import { VaultKeeper } from "./execution/vault-keeper.js";
@@ -14,6 +15,7 @@ const reconcileSchema = z.object({
 export function createMolqServer(
 	hedgeExecutor = BybitHedgeExecutor.fromEnv(),
 	vaultKeeper = VaultKeeper.fromEnv(),
+	agentRuntime = AgentRuntime.fromEnv(hedgeExecutor, vaultKeeper),
 ) {
 	return createServer(async (request, response) => {
 		setCors(response);
@@ -30,7 +32,15 @@ export function createMolqServer(
 			}
 
 			if (request.method === "GET" && request.url === "/api/dashboard") {
-				sendJson(response, 200, await withExecution(hedgeExecutor));
+				sendJson(response, 200, {
+					...(await withExecution(hedgeExecutor)),
+					decisions: agentRuntime.recentDecisions(),
+				});
+				return;
+			}
+
+			if (request.method === "GET" && request.url === "/api/agent/status") {
+				sendJson(response, 200, await agentRuntime.status());
 				return;
 			}
 
@@ -68,6 +78,12 @@ export function createMolqServer(
 			if (request.method === "POST" && request.url === "/api/execution/vault/rebalance") {
 				assertOperator(request);
 				sendJson(response, 200, await vaultKeeper.rebalance());
+				return;
+			}
+
+			if (request.method === "POST" && request.url === "/api/agent/run") {
+				assertOperator(request);
+				sendJson(response, 200, await agentRuntime.run());
 				return;
 			}
 

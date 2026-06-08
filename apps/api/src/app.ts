@@ -2,6 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { z } from "zod";
 import { AgentRuntime } from "./agent/runtime.js";
+import { getAgentIdentity } from "./agent/identity.js";
 import { getLiveDashboard } from "./dashboard.js";
 import { BybitHedgeExecutor } from "./execution/hedge-executor.js";
 import { VaultKeeper } from "./execution/vault-keeper.js";
@@ -40,7 +41,11 @@ export function createMolqServer(
 			}
 
 			if (request.method === "GET" && request.url === "/api/agent/status") {
-				sendJson(response, 200, await agentRuntime.status());
+				const [runtime, identity] = await Promise.all([
+					agentRuntime.status(),
+					getAgentIdentity(),
+				]);
+				sendJson(response, 200, { ...runtime, identity });
 				return;
 			}
 

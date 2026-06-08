@@ -12,6 +12,7 @@ export const MANTLE_USDE = "0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34";
 export const MOLQ_VAULT = "0x71711F35c200fDabE75F2e82F0146c35f32eBAA5";
 export const MOLQ_DECISION_LOGGER = "0xb6e5499C97138Ee6E25d1E904b6714BD0E60f139";
 export const ERC8004_IDENTITY_REGISTRY = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432";
+export const MOLQ_AGENT_ID = 112n;
 
 export type MolqRiskMode = "conservative" | "balanced" | "growth";
 
@@ -124,6 +125,18 @@ export interface AgentPolicyDecision {
 	model?: string;
 	safetyChecks: string[];
 	createdAt: string;
+}
+
+export interface AgentIdentity {
+	agentId: string;
+	registry: `0x${string}`;
+	owner: `0x${string}`;
+	agentWallet: `0x${string}`;
+	agentUri: string;
+	name: string;
+	description: string;
+	active: boolean;
+	registered: boolean;
 }
 
 export interface DashboardResponse {

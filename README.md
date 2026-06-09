@@ -14,7 +14,7 @@ permissionless custody through on-chain deposits and redemptions.
 
 ## Mantle Mainnet
 
-- MolqVault: `0x71711F35c200fDabE75F2e82F0146c35f32eBAA5`
+- MolqVault: `0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9`
 - MolqDecisionLogger: `0xb6e5499C97138Ee6E25d1E904b6714BD0E60f139`
 - USDe: `0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34`
 - Aave V3 Pool: `0x458F293454fE0d67EC0655f3672301301DD51422`

@@ -186,6 +186,15 @@ ponder.on("MolqVault:Rebalanced", async ({ event, context }) => {
 		});
 });
 
+ponder.on("MolqVault:ProfitHardened", async ({ event, context }) => {
+	await insertVaultEvent(context, event, {
+		type: "profit_hardened",
+		assets: event.args.grossProfit,
+		amount: event.args.feeAssets,
+		alphaBalance: event.args.netProfit,
+	});
+});
+
 ponder.on("MolqVault:EmergencyExit", async ({ event, context }) => {
 	await insertVaultEvent(context, event, {
 		type: "emergency_exit",

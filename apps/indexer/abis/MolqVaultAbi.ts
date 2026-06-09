@@ -55,6 +55,16 @@ export const MolqVaultAbi = [
 	},
 	{
 		type: "event",
+		name: "ProfitHardened",
+		inputs: [
+			{ name: "grossProfit", type: "uint256", indexed: false },
+			{ name: "feeAssets", type: "uint256", indexed: false },
+			{ name: "netProfit", type: "uint256", indexed: false },
+		],
+		anonymous: false,
+	},
+	{
+		type: "event",
 		name: "EmergencyExit",
 		inputs: [
 			{ name: "shares", type: "uint256", indexed: false },

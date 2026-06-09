@@ -34,6 +34,6 @@ contract Deploy is Script {
         console2.log("Owner:", deployer);
         console2.log("Keeper:", keeper);
         console2.log("Treasury:", treasury);
-        console2.log("Performance fee (bps):", 1000);
+        console2.log("Performance fee (bps):", uint256(1000));
     }
 }

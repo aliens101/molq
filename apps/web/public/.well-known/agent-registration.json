@@ -6,7 +6,7 @@
 	"services": [
 		{
 			"name": "vault",
-			"endpoint": "eip155:5000:0x71711F35c200fDabE75F2e82F0146c35f32eBAA5",
+			"endpoint": "eip155:5000:0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9",
 			"version": "1"
 		},
 		{

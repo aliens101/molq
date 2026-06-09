@@ -1,0 +1,27 @@
+{
+	"type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+	"name": "MolQ",
+	"description": "Autonomous CeDeFi yield agent on Mantle. MolQ allocates USDe between an Aave V3 shield position and a policy-capped Bybit hedge, with constrained AI decisions committed on-chain.",
+	"image": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHJ4PSI4IiBmaWxsPSIjMTExMTExIi8+PHBhdGggZD0iTTE0IDE2SDIyTDMwIDM1TDM4IDE2SDQ2VjQ4SDM4VjMwTDMyIDQ0SDI4TDIyIDMwVjQ4SDE0VjE2WiIgZmlsbD0iI0ZGRkZGRiIvPjwvc3ZnPg==",
+	"services": [
+		{
+			"name": "vault",
+			"endpoint": "eip155:5000:0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9",
+			"version": "1"
+		},
+		{
+			"name": "decision-log",
+			"endpoint": "eip155:5000:0x24df9c33D24D7C84e527D247D25a203490001Be9",
+			"version": "1"
+		}
+	],
+	"x402Support": false,
+	"active": true,
+	"registrations": [
+		{
+			"agentId": 112,
+			"agentRegistry": "eip155:5000:0x8004A169FB4a3325136EB29fA0ceB6D2e539a432"
+		}
+	],
+	"supportedTrust": ["crypto-economic", "reputation"]
+}

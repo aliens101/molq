@@ -1,4 +1,11 @@
-import { Activity, ExternalLink, LayoutDashboard, ShieldCheck, WalletCards } from "lucide-react";
+import {
+	Activity,
+	Bot,
+	ExternalLink,
+	LayoutDashboard,
+	ShieldCheck,
+	WalletCards,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { MOLQ_VAULT } from "@/molq/contracts";
 
@@ -6,6 +13,7 @@ const items = [
 	{ to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
 	{ to: "/deposit", label: "Deposit", icon: WalletCards },
 	{ to: "/execution", label: "Execution", icon: Activity },
+	{ to: "/agent", label: "Agent", icon: Bot },
 ];
 
 export function Sidebar() {

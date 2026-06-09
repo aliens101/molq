@@ -4,8 +4,12 @@ import {
 	Activity,
 	ArrowDownToLine,
 	ArrowUpFromLine,
+	Bot,
 	CheckCircle2,
+	CircleDollarSign,
+	Clock3,
 	ExternalLink,
+	Fingerprint,
 	LayoutDashboard,
 	RefreshCw,
 	ShieldCheck,
@@ -19,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { ExecutionTable } from "@/features/vault/ExecutionTable";
 import { VaultSummary } from "@/features/vault/VaultSummary";
 import { Sidebar } from "@/layouts/sidebar";
-import { getDashboard } from "@/molq/api";
+import { getAgentStatus, getDashboard, type AgentStatusResponse } from "@/molq/api";
 import { MOLQ_VAULT } from "@/molq/contracts";
 import { useMolqVault } from "@/molq/use-molq-vault";
 
@@ -37,6 +41,7 @@ function MolqApp() {
 	const [amount, setAmount] = useState("");
 	const [apiError, setApiError] = useState<string | null>(null);
 	const [refreshing, setRefreshing] = useState(false);
+	const [agentStatus, setAgentStatus] = useState<AgentStatusResponse | null>(null);
 
 	useEffect(() => {
 		void loadDashboard();
@@ -54,8 +59,13 @@ function MolqApp() {
 		setRefreshing(true);
 		setApiError(null);
 		try {
-			const [nextDashboard] = await Promise.all([getDashboard(), vault.refresh()]);
+			const [nextDashboard, nextAgentStatus] = await Promise.all([
+				getDashboard(),
+				getAgentStatus(),
+				vault.refresh(),
+			]);
 			setDashboard(nextDashboard);
+			setAgentStatus(nextAgentStatus);
 		} catch (caught) {
 			setApiError(normalizeApiError(caught));
 		} finally {
@@ -135,6 +145,10 @@ function MolqApp() {
 							<Route
 								path="/execution"
 								element={<ExecutionPage dashboard={dashboard} />}
+							/>
+							<Route
+								path="/agent"
+								element={<AgentPage status={agentStatus} dashboard={dashboard} />}
 							/>
 							<Route path="*" element={<Navigate to="/" replace />} />
 						</Routes>
@@ -364,6 +378,215 @@ function ExecutionPage({ dashboard }: { dashboard: DashboardResponse | null }) {
 	);
 }
 
+function AgentPage({
+	status,
+	dashboard,
+}: {
+	status: AgentStatusResponse | null;
+	dashboard: DashboardResponse | null;
+}) {
+	const lastRun = status?.lastRun;
+	const identity = status?.identity;
+	const loggerReady = Boolean(status?.logger.enabled && status.logger.authorized);
+	const bybitReady = Boolean(
+		dashboard?.hedgeExecution?.configured && dashboard.hedgeExecution.tradingEnabled,
+	);
+
+	return (
+		<div className="space-y-8">
+			<PageHeading
+				eyebrow="ERC-8004 autonomous operator"
+				title="Agent"
+				description="Policy state, identity provenance, and execution evidence for MolQ's constrained yield agent."
+			/>
+
+			<div className="grid gap-px overflow-hidden rounded-lg border border-border-edge bg-border-edge sm:grid-cols-2 xl:grid-cols-4">
+				<AgentMetric
+					icon={Bot}
+					label="OpenAI policy"
+					value={status?.modelConfigured ? "Connected" : "Fallback"}
+					detail={
+						status?.modelConfigured ? "Model proposals enabled" : "Deterministic policy"
+					}
+					ready={status?.modelConfigured ?? false}
+				/>
+				<AgentMetric
+					icon={Fingerprint}
+					label="ERC-8004 identity"
+					value={identity ? `Agent #${identity.agentId}` : "Loading"}
+					detail={identity?.registered ? "Registered on Mantle" : "Registry check"}
+					ready={Boolean(identity?.registered)}
+				/>
+				<AgentMetric
+					icon={ShieldCheck}
+					label="Decision logger"
+					value={loggerReady ? "Authorized" : "Disarmed"}
+					detail={status?.logger.message ?? "Checking signer"}
+					ready={loggerReady}
+				/>
+				<AgentMetric
+					icon={Activity}
+					label="Bybit executor"
+					value={bybitReady ? "Armed" : "Read only"}
+					detail={dashboard?.hedgeExecution?.message ?? "Checking venue"}
+					ready={bybitReady}
+				/>
+			</div>
+
+			<div className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+				<section className="rounded-lg border border-border-edge bg-card">
+					<div className="flex items-start justify-between gap-4 border-b border-border-edge px-5 py-5 sm:px-6">
+						<div>
+							<h2 className="text-xl font-bold">Latest policy cycle</h2>
+							<p className="mt-1 text-sm text-label-secondary">
+								Model proposal after deterministic capital constraints.
+							</p>
+						</div>
+						<div className="flex items-center gap-2 text-xs text-label-secondary">
+							<Clock3 className="h-4 w-4" />
+							{lastRun ? timeAgo(lastRun.completedAt) : "No cycle yet"}
+						</div>
+					</div>
+
+					{lastRun ? (
+						<div className="px-5 py-6 sm:px-6">
+							<div className="flex flex-wrap items-center gap-3">
+								<span className="rounded-md bg-fill-accent-secondary px-3 py-1.5 text-xs font-bold uppercase text-label-accent">
+									{lastRun.decision.action.replaceAll("_", " ")}
+								</span>
+								<span className="text-xs text-label-secondary">
+									{Math.round(lastRun.decision.confidence * 100)}% confidence
+								</span>
+								<span className="text-xs text-label-secondary">
+									Risk {lastRun.decision.riskScore}/100
+								</span>
+							</div>
+							<p className="mt-5 max-w-3xl text-base leading-7">
+								{lastRun.decision.reason}
+							</p>
+							<div className="mt-6 grid gap-3 sm:grid-cols-2">
+								<DecisionDetail
+									label="Target hedge"
+									value={money(lastRun.decision.targetHedgeNotionalUsd)}
+								/>
+								<DecisionDetail
+									label="Decision source"
+									value={lastRun.decision.model ?? lastRun.decision.source}
+								/>
+							</div>
+							{lastRun.decisionTransactionHash ? (
+								<a
+									href={`https://mantlescan.xyz/tx/${lastRun.decisionTransactionHash}`}
+									target="_blank"
+									rel="noreferrer"
+									className="mt-5 inline-flex items-center gap-2 text-xs font-semibold text-label-accent"
+								>
+									Verify decision
+									<ExternalLink className="h-3.5 w-3.5" />
+								</a>
+							) : null}
+						</div>
+					) : (
+						<div className="px-5 py-12 text-center sm:px-6">
+							<Bot className="mx-auto h-8 w-8 text-label-tertiary" />
+							<div className="mt-4 text-sm font-bold">Waiting for first cycle</div>
+							<p className="mt-2 text-xs text-label-secondary">
+								The operator API starts cycles; public users cannot trigger capital
+								actions.
+							</p>
+						</div>
+					)}
+				</section>
+
+				<section className="rounded-lg border border-border-edge bg-card px-5 py-6 sm:px-6">
+					<div className="flex items-center gap-3">
+						<CircleDollarSign className="h-5 w-5 text-label-accent" />
+						<h2 className="text-xl font-bold">Business model</h2>
+					</div>
+					<div className="mt-7 text-5xl font-bold">10%</div>
+					<div className="mt-2 text-sm text-label-secondary">
+						of externally realized profit
+					</div>
+					<div className="mt-7 space-y-4 border-t border-border-edge pt-5 text-sm">
+						<FeeRow label="Deposit fee" value="0%" />
+						<FeeRow label="Withdrawal fee" value="0%" />
+						<FeeRow label="Performance fee" value="10%" />
+						<FeeRow label="Maximum on-chain" value="20%" />
+					</div>
+					<p className="mt-6 text-xs leading-5 text-label-tertiary">
+						The fee is transferred only when realized Alpha profit is hardened back into
+						the USDe vault. Principal is never used to calculate the fee.
+					</p>
+				</section>
+			</div>
+
+			{identity ? (
+				<section className="flex flex-col justify-between gap-4 rounded-lg border border-border-edge bg-fill-quaternary px-5 py-5 sm:flex-row sm:items-center">
+					<div>
+						<div className="text-xs text-label-tertiary">Identity owner</div>
+						<div className="mt-1 break-all font-mono text-xs">{identity.owner}</div>
+					</div>
+					<a
+						href={`https://mantlescan.xyz/token/${identity.registry}?a=${identity.agentId}`}
+						target="_blank"
+						rel="noreferrer"
+						className="inline-flex items-center gap-2 text-xs font-semibold text-label-accent"
+					>
+						Open ERC-8004 identity
+						<ExternalLink className="h-3.5 w-3.5" />
+					</a>
+				</section>
+			) : null}
+		</div>
+	);
+}
+
+function AgentMetric({
+	icon: Icon,
+	label,
+	value,
+	detail,
+	ready,
+}: {
+	icon: typeof Bot;
+	label: string;
+	value: string;
+	detail: string;
+	ready: boolean;
+}) {
+	return (
+		<div className="min-w-0 bg-card px-5 py-5">
+			<div className="flex items-center justify-between">
+				<Icon className="h-4 w-4 text-label-secondary" />
+				<span className={`h-2 w-2 rounded-full ${ready ? "bg-positive" : "bg-orange"}`} />
+			</div>
+			<div className="mt-5 text-xs text-label-tertiary">{label}</div>
+			<div className="mt-1 text-lg font-bold">{value}</div>
+			<div className="mt-2 truncate text-xs text-label-secondary" title={detail}>
+				{detail}
+			</div>
+		</div>
+	);
+}
+
+function DecisionDetail({ label, value }: { label: string; value: string }) {
+	return (
+		<div className="rounded-lg bg-fill-quaternary px-4 py-4">
+			<div className="text-xs text-label-tertiary">{label}</div>
+			<div className="mt-2 truncate text-sm font-bold">{value}</div>
+		</div>
+	);
+}
+
+function FeeRow({ label, value }: { label: string; value: string }) {
+	return (
+		<div className="flex items-center justify-between">
+			<span className="text-label-secondary">{label}</span>
+			<span className="font-mono font-bold">{value}</span>
+		</div>
+	);
+}
+
 function AllocationPanel({
 	dashboard,
 	shield,
@@ -464,6 +687,7 @@ function MobileNavigation() {
 		{ to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
 		{ to: "/deposit", label: "Deposit", icon: WalletCards },
 		{ to: "/execution", label: "Execution", icon: Activity },
+		{ to: "/agent", label: "Agent", icon: Bot },
 	];
 	return (
 		<nav className="flex items-center gap-1 lg:hidden">
@@ -598,4 +822,11 @@ function number(value: number): string {
 
 function shorten(value: string): string {
 	return value.length > 12 ? `${value.slice(0, 6)}...${value.slice(-4)}` : value;
+}
+
+function timeAgo(value: string): string {
+	const elapsed = Date.now() - new Date(value).getTime();
+	if (elapsed < 60_000) return "just now";
+	if (elapsed < 3_600_000) return `${Math.floor(elapsed / 60_000)}m ago`;
+	return `${Math.floor(elapsed / 3_600_000)}h ago`;
 }

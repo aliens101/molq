@@ -8,30 +8,17 @@
 			"registry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
 			"agentId": 112,
 			"registrationTransactionHash": "0x8326b8f582e2a5a78e5f309a22e58b232651f578836741eb011e85f2345a554f",
-			"uriTransactionHash": "0xb08f04a7d310b262b12ef07140a2623a549d0579cb408596db66794c33f8eaf7",
+			"uriTransactionHash": "0xb77149a9779870295ed2e4b44b808d18eaafce9574a6a5be0c102f119ff81b03",
 			"blockNumber": 96423301,
 			"explorerUrl": "https://mantlescan.xyz/token/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432?a=112"
 		},
 		"decisionLogger": {
-			"address": "0xb6e5499C97138Ee6E25d1E904b6714BD0E60f139",
-			"transactionHash": "0xaf9de7cbf7f37a51339767a6e1393daf27cea9632aa1ca8b6dae66e889d41744",
-			"blockNumber": 96392436,
+			"address": "0x24df9c33D24D7C84e527D247D25a203490001Be9",
+			"transactionHash": "0x057f1448b98581dfe0abc8b4604a3e72074601151f9f8eb52fed3dabf71c1151",
+			"authorizationTransactionHash": "0x9017f2becf79c0912efc1e76b4544948e8341bbbb27790916a8fc7ad3a9c9857",
+			"blockNumber": 96435308,
 			"verified": true,
-			"explorerUrl": "https://mantlescan.xyz/address/0xb6e5499C97138Ee6E25d1E904b6714BD0E60f139#code"
-		},
-		"legacyVault": {
-			"address": "0x626599904E04d8eED214740e39F380A4D5B0aDC3",
-			"transactionHash": "0xfbd99a6849964527c94d322de84e55eba2b0a179c98216053fb0fd5855ed7dff",
-			"blockNumber": 96392438,
-			"verified": true,
-			"explorerUrl": "https://mantlescan.xyz/address/0x626599904E04d8eED214740e39F380A4D5B0aDC3#code"
-		},
-		"previousVault": {
-			"address": "0x71711F35c200fDabE75F2e82F0146c35f32eBAA5",
-			"transactionHash": "0xd9b1f93dd44e760eb52d339cd33780389553af571e644945b0a50e79b6e701f0",
-			"blockNumber": 96421908,
-			"verified": true,
-			"explorerUrl": "https://mantlescan.xyz/address/0x71711F35c200fDabE75F2e82F0146c35f32eBAA5#code"
+			"explorerUrl": "https://mantlescan.xyz/address/0x24df9c33D24D7C84e527D247D25a203490001Be9#code"
 		},
 		"vault": {
 			"address": "0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9",

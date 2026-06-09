@@ -101,7 +101,6 @@ export class DecisionLoggerClient {
 	}
 
 	async log(decision: AgentPolicyDecision, execution: unknown): Promise<Hash | undefined> {
-		if (decision.action === "hold") return undefined;
 		const status = await this.status();
 		if (!this.walletClient?.account || !status.enabled || !status.authorized) {
 			throw new Error(status.message);
@@ -140,6 +139,15 @@ export class DecisionLoggerClient {
 	}
 }
 
-function actionType(action: AgentPolicyDecision["action"]): 2 | 3 {
-	return action === "rebalance" ? 2 : 3;
+function actionType(action: AgentPolicyDecision["action"]): 7 | 8 | 9 | 10 {
+	switch (action) {
+		case "hold":
+			return 7;
+		case "rebalance":
+			return 8;
+		case "hedge":
+			return 9;
+		case "rebalance_and_hedge":
+			return 10;
+	}
 }

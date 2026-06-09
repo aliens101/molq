@@ -9,7 +9,11 @@ contract MolqDecisionLogger {
         AllocateAlpha,
         Harvest,
         Harden,
-        Pause
+        Pause,
+        Hold,
+        Rebalance,
+        Hedge,
+        RebalanceAndHedge
     }
 
     struct Decision {

@@ -26,6 +26,16 @@ contract MolqDecisionLoggerTest is Test {
         assertEq(riskScoreBps, 2500);
     }
 
+    function testAgentCanLogAutonomousHedgeDecision() public {
+        vm.prank(agent);
+        uint256 id = logger.logDecision(
+            MolqDecisionLogger.ActionType.RebalanceAndHedge, 150 ether, 2500, keccak256("positive carry")
+        );
+
+        (,, MolqDecisionLogger.ActionType actionType,,,,) = logger.decisions(id);
+        assertEq(uint256(actionType), uint256(MolqDecisionLogger.ActionType.RebalanceAndHedge));
+    }
+
     function testUnapprovedAccountCannotLogDecision() public {
         vm.expectRevert(MolqDecisionLogger.NotAgent.selector);
         logger.logDecision(MolqDecisionLogger.ActionType.AllocateShield, 0, 2000, bytes32(0));

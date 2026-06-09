@@ -22,15 +22,99 @@ type Meta {
 }
 
 type Query {
+  agentIdentity(agentId: BigInt!): agentIdentity
+  agentIdentitys(where: agentIdentityFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): agentIdentityPage!
   agent(address: String!): agent
   agents(where: agentFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): agentPage!
   decision(id: String!): decision
   decisions(where: decisionFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): decisionPage!
   vaultEvent(id: String!): vaultEvent
   vaultEvents(where: vaultEventFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): vaultEventPage!
+  vaultAccount(address: String!): vaultAccount
+  vaultAccounts(where: vaultAccountFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): vaultAccountPage!
   vaultSnapshot(id: String!): vaultSnapshot
   vaultSnapshots(where: vaultSnapshotFilter, orderBy: String, orderDirection: String, before: String, after: String, limit: Int, offset: Int): vaultSnapshotPage!
   _meta: Meta
+}
+
+type agentIdentity {
+  agentId: BigInt!
+  owner: String!
+  agentUri: String!
+  registeredAt: BigInt!
+  updatedAt: BigInt!
+  transactionHash: String!
+}
+
+type agentIdentityPage {
+  items: [agentIdentity!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input agentIdentityFilter {
+  AND: [agentIdentityFilter]
+  OR: [agentIdentityFilter]
+  agentId: BigInt
+  agentId_not: BigInt
+  agentId_in: [BigInt]
+  agentId_not_in: [BigInt]
+  agentId_gt: BigInt
+  agentId_lt: BigInt
+  agentId_gte: BigInt
+  agentId_lte: BigInt
+  owner: String
+  owner_not: String
+  owner_in: [String]
+  owner_not_in: [String]
+  owner_contains: String
+  owner_not_contains: String
+  owner_starts_with: String
+  owner_ends_with: String
+  owner_not_starts_with: String
+  owner_not_ends_with: String
+  agentUri: String
+  agentUri_not: String
+  agentUri_in: [String]
+  agentUri_not_in: [String]
+  agentUri_contains: String
+  agentUri_not_contains: String
+  agentUri_starts_with: String
+  agentUri_ends_with: String
+  agentUri_not_starts_with: String
+  agentUri_not_ends_with: String
+  agentUri_contains_nocase: String
+  agentUri_not_contains_nocase: String
+  agentUri_starts_with_nocase: String
+  agentUri_ends_with_nocase: String
+  agentUri_not_starts_with_nocase: String
+  agentUri_not_ends_with_nocase: String
+  registeredAt: BigInt
+  registeredAt_not: BigInt
+  registeredAt_in: [BigInt]
+  registeredAt_not_in: [BigInt]
+  registeredAt_gt: BigInt
+  registeredAt_lt: BigInt
+  registeredAt_gte: BigInt
+  registeredAt_lte: BigInt
+  updatedAt: BigInt
+  updatedAt_not: BigInt
+  updatedAt_in: [BigInt]
+  updatedAt_not_in: [BigInt]
+  updatedAt_gt: BigInt
+  updatedAt_lt: BigInt
+  updatedAt_gte: BigInt
+  updatedAt_lte: BigInt
+  transactionHash: String
+  transactionHash_not: String
+  transactionHash_in: [String]
+  transactionHash_not_in: [String]
+  transactionHash_contains: String
+  transactionHash_not_contains: String
+  transactionHash_starts_with: String
+  transactionHash_ends_with: String
+  transactionHash_not_starts_with: String
+  transactionHash_not_ends_with: String
 }
 
 type agent {
@@ -366,6 +450,49 @@ input vaultEventFilter {
   logIndex_lt: Int
   logIndex_gte: Int
   logIndex_lte: Int
+}
+
+type vaultAccount {
+  address: String!
+  shares: BigInt!
+  updatedAt: BigInt!
+}
+
+type vaultAccountPage {
+  items: [vaultAccount!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+input vaultAccountFilter {
+  AND: [vaultAccountFilter]
+  OR: [vaultAccountFilter]
+  address: String
+  address_not: String
+  address_in: [String]
+  address_not_in: [String]
+  address_contains: String
+  address_not_contains: String
+  address_starts_with: String
+  address_ends_with: String
+  address_not_starts_with: String
+  address_not_ends_with: String
+  shares: BigInt
+  shares_not: BigInt
+  shares_in: [BigInt]
+  shares_not_in: [BigInt]
+  shares_gt: BigInt
+  shares_lt: BigInt
+  shares_gte: BigInt
+  shares_lte: BigInt
+  updatedAt: BigInt
+  updatedAt_not: BigInt
+  updatedAt_in: [BigInt]
+  updatedAt_not_in: [BigInt]
+  updatedAt_gt: BigInt
+  updatedAt_lt: BigInt
+  updatedAt_gte: BigInt
+  updatedAt_lte: BigInt
 }
 
 type vaultSnapshot {

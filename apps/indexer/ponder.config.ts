@@ -5,7 +5,7 @@ import { MolqVaultAbi } from "./abis/MolqVaultAbi";
 
 const decisionLogger = "0x24df9c33D24D7C84e527D247D25a203490001Be9";
 const vault = "0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9";
-const startBlock = Number(process.env.PONDER_START_BLOCK ?? 96392436);
+const startBlock = Number(process.env.PONDER_START_BLOCK ?? 96423301);
 const identityRegistry = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432";
 const identityStartBlock = Number(process.env.PONDER_IDENTITY_START_BLOCK ?? 96423301);
 

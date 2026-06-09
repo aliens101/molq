@@ -20,6 +20,12 @@
 			"verified": true,
 			"explorerUrl": "https://mantlescan.xyz/address/0x24df9c33D24D7C84e527D247D25a203490001Be9#code"
 		},
+		"agentEvidence": {
+			"decisionTransactionHash": "0xb2604ab8b1ffbf04943dda52649b98513c240e8ecaf86e03ba25697083e8e6fb",
+			"model": "gpt-5.4-mini",
+			"action": "hold",
+			"explorerUrl": "https://mantlescan.xyz/tx/0xb2604ab8b1ffbf04943dda52649b98513c240e8ecaf86e03ba25697083e8e6fb"
+		},
 		"vault": {
 			"address": "0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9",
 			"transactionHash": "0x9396855c4a1a64017a884273c6ea100bdf22659d73585b5293eb251ddc9408dd",

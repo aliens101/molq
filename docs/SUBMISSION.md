@@ -29,7 +29,7 @@ adapters, and creates verifiable decision evidence.
 | Component            | Mantle mainnet                                                       |
 | -------------------- | -------------------------------------------------------------------- |
 | Vault                | `0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9`                         |
-| Decision logger      | `0x24df9c33D24D7C84e527D247D25a203490001Be9`                         |
+| Decision logger V2   | `0x0F38FF858fE3974be7c05625281CA6b774Be9E9b`                         |
 | ERC-8004 registry    | `0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`                         |
 | Agent ID             | `112`                                                                |
 | Live OpenAI decision | `0xb2604ab8b1ffbf04943dda52649b98513c240e8ecaf86e03ba25697083e8e6fb` |

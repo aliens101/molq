@@ -23,7 +23,9 @@ contract caps the performance fee at 20%.
 
 ## Mainnet Requirements
 
-- Transfer ownership, keeper, and treasury control to a fresh multisig.
+- Increase the current Safe beyond its present single-owner threshold before
+  supporting material public capital.
+- Keep the operational keeper replaceable by the Safe and rotate it regularly.
 - Add venue collateral reconciliation and withdrawal automation.
 - Complete independent smart-contract and operational-security reviews.
 - Define jurisdiction, custody, disclosures, and user eligibility before taking

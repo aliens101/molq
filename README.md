@@ -83,7 +83,7 @@ profit is reported separately.
 | Contract                   | Address                                                                                                                        |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | MolqVault                  | [`0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9`](https://mantlescan.xyz/address/0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9#code) |
-| MolqDecisionLogger         | [`0x24df9c33D24D7C84e527D247D25a203490001Be9`](https://mantlescan.xyz/address/0x24df9c33D24D7C84e527D247D25a203490001Be9#code) |
+| MolqDecisionLogger V2      | [`0x0F38FF858fE3974be7c05625281CA6b774Be9E9b`](https://mantlescan.xyz/address/0x0F38FF858fE3974be7c05625281CA6b774Be9E9b#code) |
 | ERC-8004 Identity Registry | [`0x8004A169FB4a3325136EB29fA0ceB6D2e539a432`](https://mantlescan.xyz/token/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432?a=112)  |
 | USDe                       | `0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34`                                                                                   |
 | Aave V3 Pool               | `0x458F293454fE0d67EC0655f3672301301DD51422`                                                                                   |
@@ -99,6 +99,8 @@ evidence are stored in `deployments/mantle-mainnet.json`.
 - Bybit trading is disabled unless credentials and
   `BYBIT_TRADING_ENABLED=true` are present.
 - Keeper writes require `MOLQ_KEEPER_ENABLED=true` and an authorized signer.
+- Vault ownership, treasury, and decision logger V2 ownership are controlled by
+  the MolQ Safe.
 - Agent writes require `MOLQ_AGENT_WRITES_ENABLED=true`.
 - Operator routes require `MOLQ_OPERATOR_API_KEY`.
 - Hedge notional, leverage, slippage, risk score, and minimum funding carry are
@@ -182,6 +184,8 @@ The production deployment script is defensive and affects only the
 - ERC-8004 identity and decision logging are live.
 - Ponder is synchronized with Mantle mainnet.
 - The vault has a live mainnet deposit allocated to Aave according to policy.
+- Safe ownership and treasury migration are complete; the keeper remains a
+  replaceable operational signer.
 
 Hackathon positioning, demo flow, and the submission checklist are available in
 [`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md).

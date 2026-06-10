@@ -39,7 +39,7 @@ exchange or model risk.
 - Indexer: https://indexer.molq.site/graphql
 - Repository: https://github.com/aliens101/molq
 - Vault: https://mantlescan.xyz/address/0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9#code
-- Decision logger: https://mantlescan.xyz/address/0x24df9c33D24D7C84e527D247D25a203490001Be9#code
+- Decision logger: https://mantlescan.xyz/address/0x0F38FF858fE3974be7c05625281CA6b774Be9E9b#code
 - ERC-8004 agent 112: https://mantlescan.xyz/token/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432?a=112
 
 ## Current Mainnet Evidence

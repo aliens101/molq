@@ -27,7 +27,8 @@ and indexed data.
 - Network: Mantle mainnet, chain ID `5000`.
 - Vault: `0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9`.
 - USDe: `0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34`.
-- Decision logger: `0x24df9c33D24D7C84e527D247D25a203490001Be9`.
+- Decision logger V2: `0x0F38FF858fE3974be7c05625281CA6b774Be9E9b`.
+- Safe owner and treasury: `0xFd735C02Afe8D539dFCde0D2fC7Aa4510306354C`.
 - ERC-8004 agent ID: `112`.
 - Public API: `https://api.molq.site`.
 - GraphQL: `https://indexer.molq.site/graphql`.

@@ -24,6 +24,14 @@ pm2 restart molq-api molq-indexer molq-monitor
 All three processes use automatic restart with exponential backoff. The API
 also handles `SIGTERM` and `SIGINT` with a bounded graceful shutdown.
 
+## Ponder schema changes
+
+Ponder binds a production schema to the indexer app identity. When contract
+sources or start blocks change, rotate the `--schema` value in
+`deploy/ecosystem.config.cjs` instead of dropping the active schema. This keeps
+the previous dataset available for rollback while the new schema replays
+deterministic onchain history.
+
 ## Degraded health response
 
 1. Identify the failed check in `/api/health/deep`.

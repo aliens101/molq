@@ -21,7 +21,7 @@ module.exports = {
 			name: "molq-indexer",
 			cwd: "/home/cuyvps/apps/molq/apps/indexer",
 			script: "./node_modules/.bin/ponder",
-			args: "start --port 8071 --schema molq",
+			args: "start --port 8071 --schema molq_v2",
 			interpreter: "none",
 			env: {
 				NODE_ENV: "production",

@@ -1,0 +1,54 @@
+---
+title: "Yield and APY"
+description: "Interpret active projected APY, target scenario APY, funding carry, and realized profit."
+---
+
+MolQ separates live exposure from a hypothetical target allocation.
+
+## Active projected APY
+
+Active projected APY uses the capital and hedge exposure that currently exist:
+
+```text
+shield contribution = Aave supply APY x actual shield share
+hedge contribution  = short funding APY x actual hedge share
+active projected APY = shield contribution + hedge contribution
+```
+
+When the Bybit hedge is zero, negative funding does not reduce active projected
+APY. It only affects the target scenario.
+
+## Target scenario APY
+
+Target scenario APY estimates the current market opportunity if the complete
+85% shield and 15% hedge policy were active:
+
+```text
+target scenario APY =
+  (Aave USDe supply APY x 85%) +
+  (ETHUSDT short funding APY x 15%)
+```
+
+For a short perpetual position:
+
+- Positive funding means longs pay shorts.
+- Negative funding means shorts pay longs.
+
+If Aave supply APY is `0.61%` and short funding APY is `-5.71%`, the target
+scenario is:
+
+```text
+(0.61% x 85%) + (-5.71% x 15%) = -0.34%
+```
+
+<Warning>
+	Projected APY is not realized performance, a promise, or a guaranteed return. Aave rates and
+	perpetual funding change continuously. Trading fees, slippage, basis movement, exchange risk,
+	and operational costs can reduce returns.
+</Warning>
+
+## Realized profit
+
+Realized external profit is only reported after USDe is returned to the vault
+through `hardenProfit`. Unrealized exchange PnL is displayed separately and is
+not counted as vault profit.

@@ -1,0 +1,56 @@
+---
+title: "Constrained AI agent"
+description: "Learn how model proposals are constrained, executed, logged, and verified."
+---
+
+The MolQ agent runs on a configurable interval and evaluates current vault and
+market state. The model proposes an action, but deterministic code decides
+whether the action is allowed.
+
+## Inputs
+
+- Total, shield, and liquid vault assets.
+- Target shield allocation and current drift.
+- Current Bybit short notional.
+- Aave USDe supply APY and liquidity.
+- Bybit ETHUSDT funding APY and mark price.
+- Market availability and risk score.
+
+## Possible actions
+
+| Action                | Result                                                  |
+| --------------------- | ------------------------------------------------------- |
+| `hold`                | Record the decision without changing exposure.          |
+| `rebalance`           | Ask the authorized keeper to restore the shield target. |
+| `hedge`               | Ask the guarded executor to reconcile hedge notional.   |
+| `rebalance_and_hedge` | Perform both guarded workflows.                         |
+
+## Safety policy
+
+The policy can reject or reduce proposals based on:
+
+- Market status and data freshness.
+- Maximum market risk.
+- Vault allocation drift.
+- Funding carry.
+- Maximum hedge notional and leverage.
+- Minimum economically meaningful hedge size.
+- Slippage and venue minimum order requirements.
+- Trading, keeper, and agent-write feature gates.
+
+By default, hedge proposals below the configured minimum notional are converted
+to `hold`. This prevents uneconomic dust trades.
+
+## Verifiable identity and decisions
+
+MolQ uses ERC-8004 agent identity `112`. Accepted decisions are written to
+`MolqDecisionLogger` with the action, amount, risk score, reason hash, agent
+address, and timestamp. Ponder indexes the emitted events for public queries.
+
+<Card
+	title="Inspect agent 112"
+	icon="fingerprint"
+	href="https://mantlescan.xyz/token/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432?a=112"
+>
+	Open the registered MolQ agent identity on Mantlescan.
+</Card>

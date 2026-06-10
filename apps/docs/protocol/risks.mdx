@@ -1,0 +1,53 @@
+---
+title: "Risks and trust assumptions"
+description: "Review the protocol, market, custody, model, and operational risks of MolQ."
+---
+
+<Warning>
+	MolQ is experimental, unaudited software. Do not deposit funds you cannot afford to lose.
+</Warning>
+
+## Smart contract risk
+
+The vault uses ERC-4626, OpenZeppelin components, and Aave V3, but implementation
+or integration defects can still cause loss or prevent withdrawals. Verified
+source code is not a substitute for an independent audit.
+
+## Aave and USDe risk
+
+Vault assets depend on Aave V3 liquidity, USDe solvency and peg stability, token
+behavior, Mantle operation, and external governance. Aave withdrawal liquidity
+can become constrained.
+
+## Exchange and hedge risk
+
+The Bybit account is offchain custody. It introduces counterparty, liquidation,
+API, account, settlement, basis, and operational risk. Vault assets do not
+automatically prove exchange collateral or PnL.
+
+## Agent and operator risk
+
+The model can produce incorrect reasoning. Deterministic policy limits reduce
+the action space but cannot prove profitability. Authorized keeper, logger, and
+operator credentials remain privileged.
+
+## Current controls
+
+- Permissionless ERC-4626 redemption.
+- Pausable deposits and emergency Aave exit.
+- Two-step vault ownership transfer.
+- Bounded performance fee.
+- Explicit keeper authorization.
+- Independent gates for agent writes and Bybit trading.
+- Timing-safe operator API authentication.
+- Onchain decision hashes and indexed execution evidence.
+
+## Mainnet maturity
+
+Before supporting material public capital, MolQ still requires:
+
+- Independent contract and operational security audits.
+- Multisig ownership, keeper, and treasury controls.
+- Automated exchange collateral reconciliation and withdrawal operations.
+- Monitoring, incident response, and key rotation procedures.
+- Legal, custody, eligibility, and disclosure review.

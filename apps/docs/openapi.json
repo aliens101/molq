@@ -1,0 +1,271 @@
+{
+	"openapi": "3.1.0",
+	"info": {
+		"title": "MolQ API",
+		"version": "1.0.0",
+		"description": "Live MolQ vault, market, agent, and execution state. Public endpoints are read-only. Operator endpoints require an explicitly configured credential."
+	},
+	"servers": [
+		{
+			"url": "https://api.molq.site"
+		}
+	],
+	"tags": [
+		{ "name": "System" },
+		{ "name": "Portfolio" },
+		{ "name": "Agent" },
+		{ "name": "Execution" }
+	],
+	"paths": {
+		"/api/health": {
+			"get": {
+				"tags": ["System"],
+				"summary": "Check API health",
+				"operationId": "getHealth",
+				"responses": {
+					"200": {
+						"description": "Service is healthy",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": { "type": "string", "example": "ok" },
+										"service": { "type": "string", "example": "molq-api" }
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/dashboard": {
+			"get": {
+				"tags": ["Portfolio"],
+				"summary": "Get live dashboard state",
+				"description": "Returns vault balances, active and target APY projections, live market inputs, recent agent decisions, and hedge execution state.",
+				"operationId": "getDashboard",
+				"responses": {
+					"200": {
+						"description": "Live dashboard snapshot",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/Dashboard" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/agent/status": {
+			"get": {
+				"tags": ["Agent"],
+				"summary": "Get agent runtime status",
+				"operationId": "getAgentStatus",
+				"responses": {
+					"200": {
+						"description": "Runtime, logger, identity, and recent decision reports",
+						"content": {
+							"application/json": {
+								"schema": { "type": "object", "additionalProperties": true }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/integrations/markets": {
+			"get": {
+				"tags": ["Portfolio"],
+				"summary": "Get Aave and Bybit market inputs",
+				"operationId": "getMarkets",
+				"responses": {
+					"200": {
+						"description": "Current market snapshot",
+						"content": {
+							"application/json": {
+								"schema": { "type": "object", "additionalProperties": true }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/execution/vault": {
+			"get": {
+				"tags": ["Execution"],
+				"summary": "Get vault keeper status",
+				"operationId": "getVaultExecution",
+				"responses": {
+					"200": {
+						"description": "Keeper authorization and allocation state",
+						"content": {
+							"application/json": {
+								"schema": { "type": "object", "additionalProperties": true }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/execution/hedge": {
+			"get": {
+				"tags": ["Execution"],
+				"summary": "Get hedge execution status",
+				"operationId": "getHedgeExecution",
+				"parameters": [
+					{
+						"name": "targetNotionalUsd",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "number", "minimum": 0 }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Bybit configuration and current short exposure",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HedgeExecution" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/agent/run": {
+			"post": {
+				"tags": ["Agent"],
+				"summary": "Run one privileged agent cycle",
+				"operationId": "runAgent",
+				"security": [{ "operatorKey": [] }],
+				"responses": {
+					"200": { "description": "Agent execution report" },
+					"400": { "$ref": "#/components/responses/BadRequest" }
+				}
+			}
+		},
+		"/api/execution/vault/rebalance": {
+			"post": {
+				"tags": ["Execution"],
+				"summary": "Run a privileged vault rebalance",
+				"operationId": "rebalanceVault",
+				"security": [{ "operatorKey": [] }],
+				"responses": {
+					"200": { "description": "Vault keeper result" },
+					"400": { "$ref": "#/components/responses/BadRequest" }
+				}
+			}
+		},
+		"/api/execution/hedge/reconcile": {
+			"post": {
+				"tags": ["Execution"],
+				"summary": "Reconcile privileged hedge notional",
+				"operationId": "reconcileHedge",
+				"security": [{ "operatorKey": [] }],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"required": ["targetNotionalUsd", "idempotencyKey"],
+								"properties": {
+									"targetNotionalUsd": { "type": "number", "minimum": 0 },
+									"idempotencyKey": {
+										"type": "string",
+										"minLength": 8,
+										"maxLength": 128
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": { "description": "Hedge reconciliation result" },
+					"400": { "$ref": "#/components/responses/BadRequest" }
+				}
+			}
+		}
+	},
+	"components": {
+		"securitySchemes": {
+			"operatorKey": {
+				"type": "apiKey",
+				"in": "header",
+				"name": "X-Molq-Operator-Key",
+				"description": "Private operator credential. Never expose this key in a browser or public client."
+			}
+		},
+		"responses": {
+			"BadRequest": {
+				"description": "Validation, authorization, configuration, or execution error",
+				"content": {
+					"application/json": {
+						"schema": {
+							"type": "object",
+							"properties": {
+								"error": { "type": "string" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"schemas": {
+			"Dashboard": {
+				"type": "object",
+				"required": ["portfolio", "market", "decisions"],
+				"properties": {
+					"portfolio": {
+						"type": "object",
+						"additionalProperties": true
+					},
+					"market": {
+						"type": "object",
+						"properties": {
+							"mantleYieldApy": { "type": "number" },
+							"fundingApy": { "type": "number" },
+							"estimatedNetApy": {
+								"type": "number",
+								"description": "Projected APY from current active exposure."
+							},
+							"targetNetApy": {
+								"type": "number",
+								"description": "Hypothetical projected APY at the complete target allocation."
+							},
+							"shieldContributionApy": { "type": "number" },
+							"hedgeContributionApy": { "type": "number" },
+							"hedgeRatio": { "type": "number" },
+							"liquidityScore": { "type": "number" },
+							"riskScore": { "type": "number" },
+							"updatedAt": { "type": "string", "format": "date-time" }
+						}
+					},
+					"decisions": {
+						"type": "array",
+						"items": { "type": "object", "additionalProperties": true }
+					},
+					"hedgeExecution": { "$ref": "#/components/schemas/HedgeExecution" }
+				}
+			},
+			"HedgeExecution": {
+				"type": "object",
+				"properties": {
+					"configured": { "type": "boolean" },
+					"tradingEnabled": { "type": "boolean" },
+					"venue": { "type": "string", "const": "Bybit" },
+					"symbol": { "type": "string", "const": "ETHUSDT" },
+					"targetNotionalUsd": { "type": "number" },
+					"currentShortQuantity": { "type": "number" },
+					"currentShortNotionalUsd": { "type": "number" },
+					"accountEquityUsd": { "type": "number" },
+					"unrealizedPnlUsd": { "type": "number" },
+					"message": { "type": "string" }
+				}
+			}
+		}
+	}
+}

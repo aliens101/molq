@@ -1,0 +1,52 @@
+---
+title: "Deposit and withdraw"
+description: "Deposit USDe into MolQ on Mantle and redeem your mqUSDe shares."
+---
+
+## Prerequisites
+
+- A wallet supported by the MolQ application.
+- Mantle mainnet configured in your wallet.
+- USDe on Mantle.
+- MNT for transaction gas.
+
+<Steps>
+	<Step title="Open the MolQ app">
+		Visit [app.molq.site](https://app.molq.site), connect your wallet, and switch to Mantle
+		mainnet when prompted.
+	</Step>
+	<Step title="Enter a deposit amount">
+		Open **Deposit**, enter the amount of USDe, and review the current vault allocation and
+		variable APY inputs.
+	</Step>
+	<Step title="Approve USDe">
+		When your allowance is insufficient, sign the USDe approval transaction. This permits only
+		the MolQ vault to transfer the amount you approve.
+	</Step>
+	<Step title="Deposit">
+		Sign the vault deposit transaction. The ERC-4626 vault transfers USDe, mints `mqUSDe`, and
+		supplies the target shield allocation to Aave.
+	</Step>
+	<Step title="Verify the position">
+		Check your `mqUSDe` balance in the app and open the transaction link on Mantlescan.
+	</Step>
+</Steps>
+
+## Withdraw
+
+Select **Withdraw all** in the app and sign the redemption transaction. If the
+vault does not hold enough liquid USDe, it withdraws the required assets from
+Aave before returning USDe to your wallet.
+
+<Info>
+	Deposits and withdrawals do not depend on an AI decision. They are direct ERC-4626 contract
+	calls and remain available while the required onchain liquidity exists. Deposits are disabled
+	when the vault is paused; withdrawals remain available.
+</Info>
+
+## Transaction sequence
+
+```text
+Deposit: wallet -> approve USDe -> MolqVault.deposit -> mint mqUSDe
+Withdraw: wallet -> MolqVault.redeem -> burn mqUSDe -> receive USDe
+```

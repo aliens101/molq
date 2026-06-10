@@ -1,0 +1,14 @@
+{
+	"name": "@molq/docs",
+	"version": "1.0.0",
+	"private": true,
+	"scripts": {
+		"dev": "mint dev",
+		"validate": "mint validate",
+		"check-links": "mint broken-links",
+		"check": "pnpm validate && pnpm check-links"
+	},
+	"devDependencies": {
+		"mint": "^4.2.608"
+	}
+}

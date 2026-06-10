@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="40" viewBox="0 0 150 40">
+  <g fill="#10130f">
+    <path d="M29.5 10v20h3l7.1-7.1V10H29.5ZM10 30V10H7l-7 7.1V30h10ZM29.5 2.6c0-1.5-1.1-2.6-2.5-2.6H16.6L10 7.1V10h19.5V2.6ZM10 37.4c0 1.5 1.1 2.6 2.5 2.6h10.4l6.6-7.1V30H10v7.4Z"/>
+    <text x="50" y="28" font-family="Arial, sans-serif" font-size="25" font-weight="700">MolQ</text>
+  </g>
+</svg>

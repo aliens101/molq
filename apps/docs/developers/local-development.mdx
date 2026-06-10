@@ -1,0 +1,61 @@
+---
+title: "Local development"
+description: "Run MolQ applications, contracts, indexer, and Mintlify documentation locally."
+---
+
+## Requirements
+
+- Node.js 20.17 or newer.
+- pnpm 10.
+- Foundry.
+- PostgreSQL for Ponder.
+
+## Install
+
+```bash
+git clone https://github.com/aliens101/molq.git
+cd molq
+pnpm install
+cp apps/api/.env.example apps/api/.env
+cp apps/indexer/.env.example apps/indexer/.env.local
+```
+
+Never commit private keys or API credentials.
+
+## Run services
+
+```bash
+pnpm dev:all
+```
+
+Run the landing page or docs separately:
+
+```bash
+pnpm landing
+pnpm docs
+```
+
+| Service | Default URL              |
+| ------- | ------------------------ |
+| Dapp    | `http://localhost:5173`  |
+| Landing | `http://localhost:5174`  |
+| API     | `http://localhost:8787`  |
+| Ponder  | `http://localhost:42069` |
+| Docs    | `http://localhost:3000`  |
+
+## Validate
+
+```bash
+pnpm build
+pnpm test
+pnpm docs:check
+pnpm format:check
+```
+
+Contract-only validation:
+
+```bash
+pnpm contracts:build
+pnpm contracts:test
+pnpm contracts:fmt
+```

@@ -1,0 +1,94 @@
+{
+	"$schema": "https://mintlify.com/docs.json",
+	"theme": "mint",
+	"name": "MolQ",
+	"description": "Documentation for the MolQ autonomous USDe yield agent on Mantle.",
+	"colors": {
+		"primary": "#cf5a22",
+		"light": "#e86f32",
+		"dark": "#a83f14"
+	},
+	"favicon": "/favicon.svg",
+	"navigation": {
+		"tabs": [
+			{
+				"tab": "Documentation",
+				"groups": [
+					{
+						"group": "Start here",
+						"pages": ["index", "getting-started/quickstart", "getting-started/get-usde"]
+					},
+					{
+						"group": "Protocol",
+						"pages": [
+							"protocol/how-it-works",
+							"protocol/yield-and-apy",
+							"protocol/agent",
+							"protocol/risks",
+							"protocol/contracts"
+						]
+					},
+					{
+						"group": "Developers",
+						"pages": [
+							"developers/architecture",
+							"developers/indexer",
+							"developers/local-development",
+							"developers/deployment"
+						]
+					}
+				]
+			},
+			{
+				"tab": "API reference",
+				"openapi": "openapi.json"
+			}
+		],
+		"global": {
+			"anchors": [
+				{
+					"anchor": "Application",
+					"href": "https://app.molq.site",
+					"icon": "arrow-up-right-from-square"
+				},
+				{
+					"anchor": "GitHub",
+					"href": "https://github.com/aliens101/molq",
+					"icon": "github"
+				}
+			]
+		}
+	},
+	"logo": {
+		"light": "/logo/light.svg",
+		"dark": "/logo/dark.svg",
+		"href": "https://molq.site"
+	},
+	"navbar": {
+		"links": [
+			{
+				"label": "Mantlescan",
+				"href": "https://mantlescan.xyz/address/0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9"
+			}
+		],
+		"primary": {
+			"type": "button",
+			"label": "Open app",
+			"href": "https://app.molq.site"
+		}
+	},
+	"contextual": {
+		"options": ["copy", "view", "chatgpt", "claude", "perplexity", "mcp", "cursor", "vscode"]
+	},
+	"footer": {
+		"socials": {
+			"github": "https://github.com/aliens101/molq"
+		}
+	},
+	"seo": {
+		"metatags": {
+			"og:type": "website",
+			"og:site_name": "MolQ Documentation"
+		}
+	}
+}

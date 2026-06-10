@@ -1,0 +1,40 @@
+---
+title: "Deployment and CI/CD"
+description: "Understand MolQ verification, VPS deployment, and Mintlify monorepo publishing."
+---
+
+Every push to `main` runs the `CI and Deploy` GitHub Actions workflow.
+
+## Verification
+
+The workflow:
+
+1. Installs pnpm, Node.js, Foundry, and contract dependencies.
+2. Installs the frozen workspace lockfile.
+3. Validates Mintlify configuration and internal links.
+4. Builds the API, dapp, landing page, indexer types, and contracts.
+5. Runs API, frontend, and Solidity tests.
+
+## Application deployment
+
+After verification, GitHub Actions connects to the VPS over SSH. The deployment
+script creates versioned static releases for the landing page and dapp, restarts
+the API and indexer through PM2, and checks local health endpoints.
+
+## Mintlify deployment
+
+Mintlify publishes documentation directly from the monorepo through its GitHub
+App. Configure the project in the Mintlify dashboard:
+
+1. Select `aliens101/molq` as the Git repository.
+2. Enable **Set up as monorepo**.
+3. Set the documentation path to `/apps/docs`.
+4. Save the Git settings.
+
+After this one-time dashboard change, pushes to `main` publish documentation
+automatically and pull requests receive Mintlify previews.
+
+<Note>
+	The previous standalone `aliens101/docs` repository is no longer the source of truth after the
+	Mintlify Git setting points to this monorepo.
+</Note>

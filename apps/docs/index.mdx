@@ -1,0 +1,54 @@
+---
+title: "MolQ documentation"
+description: "Learn how MolQ manages USDe yield on Mantle with an ERC-4626 vault, Aave V3, constrained AI decisions, and verifiable execution."
+---
+
+MolQ is an autonomous CeDeFi yield agent for USDe on Mantle. You deposit USDe
+into a permissionless ERC-4626 vault and receive transferable `mqUSDe` shares.
+The vault supplies its shield allocation to Aave V3 while a constrained agent
+evaluates market conditions and records accepted decisions on Mantle.
+
+<Warning>
+	MolQ is experimental software and has not completed an independent security audit. Yield is
+	variable and capital is at risk.
+</Warning>
+
+<CardGroup cols={2}>
+	<Card title="Deposit USDe" icon="vault" href="/getting-started/quickstart">
+		Connect to Mantle, approve USDe, and mint mqUSDe vault shares.
+	</Card>
+	<Card title="Understand the strategy" icon="diagram-project" href="/protocol/how-it-works">
+		Follow capital from the vault to Aave and through the guarded agent policy.
+	</Card>
+	<Card title="Verify onchain activity" icon="magnifying-glass-chart" href="/protocol/contracts">
+		Inspect the verified vault, decision logger, and ERC-8004 identity.
+	</Card>
+	<Card title="Build with MolQ" icon="code" href="/developers/architecture">
+		Use the API, Ponder GraphQL indexer, contracts, and shared types.
+	</Card>
+</CardGroup>
+
+## Live services
+
+| Service        | URL                                                            |
+| -------------- | -------------------------------------------------------------- |
+| Application    | [app.molq.site](https://app.molq.site)                         |
+| Performance    | [app.molq.site/performance](https://app.molq.site/performance) |
+| Public API     | [api.molq.site](https://api.molq.site/api/health)              |
+| Ponder GraphQL | [indexer.molq.site/graphql](https://indexer.molq.site/graphql) |
+| Source code    | [github.com/aliens101/molq](https://github.com/aliens101/molq) |
+
+## What MolQ automates
+
+1. The vault mints `mqUSDe` shares for deposited USDe.
+2. Approximately 85% of vault assets are supplied to Aave V3 USDe.
+3. The remaining liquid sleeve is available to the strategy policy.
+4. The agent compares Aave yield, Bybit funding, liquidity, allocation drift,
+   current hedge exposure, and risk limits.
+5. Deterministic checks can reduce or reject the model proposal.
+6. Accepted decisions are hashed, logged onchain, and indexed by Ponder.
+
+<Tip>
+	Start with the [quickstart](/getting-started/quickstart), then review [risks and trust
+	assumptions](/protocol/risks) before depositing.
+</Tip>

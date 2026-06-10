@@ -1,0 +1,65 @@
+---
+title: "Ponder indexer"
+description: "Query MolQ vault events, account balances, decisions, and ERC-8004 identity through GraphQL."
+---
+
+The production GraphQL endpoint is:
+
+```text
+https://indexer.molq.site/graphql
+```
+
+Ponder indexes:
+
+- Vault deposits, withdrawals, transfers, and account share balances.
+- Shield investments, redemptions, rebalances, and profit hardening.
+- Agent authorization and decision records.
+- ERC-8004 registration and URI updates for agent `112`.
+
+## Query recent decisions
+
+```graphql
+query RecentDecisions {
+	decisions(orderBy: "blockTimestamp", orderDirection: "desc", limit: 10) {
+		items {
+			decisionId
+			agent
+			actionType
+			amount
+			riskScoreBps
+			reasonHash
+			transactionHash
+			blockTimestamp
+		}
+	}
+}
+```
+
+## Query a vault account
+
+```graphql
+query VaultAccount($address: String!) {
+	vaultAccount(address: $address) {
+		address
+		shares
+		updatedAt
+	}
+}
+```
+
+## Query the latest allocation snapshot
+
+```graphql
+query LatestAllocation {
+	vaultSnapshot(id: "latest") {
+		shieldBalance
+		alphaBalance
+		totalAssets
+		blockNumber
+		transactionHash
+	}
+}
+```
+
+All token amounts are returned as integer base units. USDe and `mqUSDe` use 18
+decimals.

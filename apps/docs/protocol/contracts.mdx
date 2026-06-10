@@ -1,0 +1,44 @@
+---
+title: "Contracts and addresses"
+description: "Verify MolQ contracts, tokens, protocol integrations, and agent identity on Mantle."
+---
+
+MolQ is deployed on Mantle mainnet, chain ID `5000`.
+
+| Component         | Address                                                                                           |
+| ----------------- | ------------------------------------------------------------------------------------------------- |
+| MolqVault         | [`0xBcBe...6Eb9`](https://mantlescan.xyz/address/0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9#code) |
+| Decision logger   | [`0x24df...1Be9`](https://mantlescan.xyz/address/0x24df9c33D24D7C84e527D247D25a203490001Be9#code) |
+| ERC-8004 registry | [`0x8004...a432`](https://mantlescan.xyz/address/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432)      |
+| Agent ID          | [`112`](https://mantlescan.xyz/token/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432?a=112)            |
+| USDe              | [`0x5d3a...ef34`](https://mantlescan.xyz/address/0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34)      |
+| Aave V3 Pool      | [`0x458F...1422`](https://mantlescan.xyz/address/0x458F293454fE0d67EC0655f3672301301DD51422)      |
+| Aave aUSDe        | [`0xb9aC...5ee7`](https://mantlescan.xyz/address/0xb9aCA933C9c0aa854a6DBb7b12f0CC3FdaC15ee7)      |
+
+## MolqVault interface
+
+User functions follow ERC-4626:
+
+```solidity
+function deposit(uint256 assets, address receiver) returns (uint256 shares);
+function redeem(
+    uint256 shares,
+    address receiver,
+    address owner
+) returns (uint256 assets);
+function totalAssets() view returns (uint256);
+function convertToAssets(uint256 shares) view returns (uint256);
+```
+
+Strategy state:
+
+```solidity
+function shieldAssets() view returns (uint256);
+function liquidAssets() view returns (uint256);
+function shieldTargetBps() view returns (uint256);
+function performanceFeeBps() view returns (uint256);
+```
+
+Privileged strategy functions include `rebalance`, `hardenProfit`,
+`emergencyExit`, configuration updates, and pause controls. Review the verified
+contract source for exact authorization and revert behavior.

@@ -634,7 +634,7 @@ function AllocationPanel({
 			<div className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-lg bg-border-edge sm:grid-cols-4">
 				<Detail label="Share token" value="mqUSDe" />
 				<Detail
-					label="Funding APY"
+					label="Short funding carry"
 					value={`${dashboard?.alphaMarket?.estimatedFundingApy.toFixed(2) ?? "0.00"}%`}
 				/>
 				<Detail

@@ -358,7 +358,7 @@ export default function App() {
 								status={dataState}
 							/>
 							<MetricCell
-								label="Estimated net APY"
+								label="Projected target APY"
 								value={dashboard ? percent(dashboard.market.estimatedNetApy) : "—"}
 								status={dataState}
 							/>
@@ -441,6 +441,7 @@ export default function App() {
 									<AllocationRow
 										label="Shield / Aave V3 USDe"
 										value={shieldPercent}
+										apyLabel="Supply APY"
 										apy={
 											dashboard
 												? percent(dashboard.market.mantleYieldApy)
@@ -456,6 +457,7 @@ export default function App() {
 									<AllocationRow
 										label="Alpha / liquid hedge sleeve"
 										value={alphaPercent}
+										apyLabel="Short funding carry"
 										apy={dashboard ? percent(dashboard.market.fundingApy) : "—"}
 										amount={
 											dashboard
@@ -468,7 +470,7 @@ export default function App() {
 
 								<div className="mt-9 grid border-l border-t border-ink/15 sm:grid-cols-3">
 									<LightMetric
-										label="Estimated net APY"
+										label="Projected target APY"
 										value={
 											dashboard
 												? percent(dashboard.market.estimatedNetApy)
@@ -872,12 +874,14 @@ function AllocationRow({
 	label,
 	value,
 	apy,
+	apyLabel,
 	amount,
 	color,
 }: {
 	label: string;
 	value: number;
 	apy: string;
+	apyLabel: string;
 	amount: string;
 	color: string;
 }) {
@@ -890,7 +894,9 @@ function AllocationRow({
 				</div>
 				<div className="text-right">
 					<div className="font-mono text-lg font-bold">{value}%</div>
-					<div className="text-xs text-ink/45">{apy} input APY</div>
+					<div className="text-xs text-ink/45">
+						{apy} {apyLabel}
+					</div>
 				</div>
 			</div>
 			<div className="mt-4 h-2 overflow-hidden bg-ink/10">

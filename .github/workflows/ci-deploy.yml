@@ -28,6 +28,11 @@ jobs:
 
             - uses: foundry-rs/foundry-toolchain@v1
 
+            - name: Install Foundry dependencies
+              run: |
+                  forge install foundry-rs/forge-std@v1.16.0 --no-git --root contracts
+                  forge install OpenZeppelin/openzeppelin-contracts@v5.4.0 --no-git --root contracts
+
             - run: pnpm install --frozen-lockfile
             - run: pnpm build
             - run: pnpm test

@@ -151,6 +151,45 @@ export interface DashboardResponse {
 	decisions: AgentDecision[];
 }
 
+export interface PerformancePoint {
+	timestamp: string;
+	totalAssets: number;
+	shieldAssets: number;
+	liquidAssets: number;
+	activeProjectedApy: number;
+	targetScenarioApy: number;
+	aaveSupplyApy: number;
+	fundingApy: number;
+	riskScore: number;
+}
+
+export interface VaultHistoryEvent {
+	id: string;
+	type: string;
+	assets?: string | null;
+	shares?: string | null;
+	amount?: string | null;
+	blockTimestamp: string;
+	transactionHash: `0x${string}`;
+}
+
+export interface VaultHistorySnapshot {
+	id: string;
+	trigger: string;
+	totalAssets: string;
+	shieldBalance: string;
+	alphaBalance: string;
+	blockTimestamp: string;
+	transactionHash: `0x${string}`;
+}
+
+export interface PerformanceHistory {
+	performance: PerformancePoint[];
+	vaultEvents: VaultHistoryEvent[];
+	vaultSnapshots: VaultHistorySnapshot[];
+	indexerAvailable: boolean;
+}
+
 export interface SimulateRequest {
 	amount: number;
 	riskMode: MolqRiskMode;

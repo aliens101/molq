@@ -11,8 +11,23 @@ const vaultKeeper = VaultKeeper.fromEnv();
 const agentRuntime = AgentRuntime.fromEnv(hedgeExecutor, vaultKeeper);
 const server = createMolqServer(hedgeExecutor, vaultKeeper, agentRuntime);
 
-agentRuntime.start();
+const agentTimer = agentRuntime.start();
 
 server.listen(port, host, () => {
 	console.log(`MolQ API listening on http://${host}:${port}`);
 });
+
+for (const signal of ["SIGTERM", "SIGINT"] as const) {
+	process.on(signal, () => {
+		console.log(`MolQ API received ${signal}, shutting down`);
+		if (agentTimer) clearInterval(agentTimer);
+		server.close((error) => {
+			if (error) {
+				console.error("MolQ API shutdown failed:", error);
+				process.exitCode = 1;
+			}
+			process.exit();
+		});
+		setTimeout(() => process.exit(1), 10_000).unref();
+	});
+}

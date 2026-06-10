@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { DashboardResponse } from "@molq/shared";
+import type { DashboardResponse, PerformanceHistory } from "@molq/shared";
 import {
 	Activity,
 	ArrowDownToLine,
@@ -27,7 +27,12 @@ import { GetUsdeDialog } from "@/features/vault/GetUsdeDialog";
 import { TransactionStepperDialog } from "@/features/vault/TransactionStepperDialog";
 import { VaultSummary } from "@/features/vault/VaultSummary";
 import { Sidebar } from "@/layouts/sidebar";
-import { getAgentStatus, getDashboard, type AgentStatusResponse } from "@/molq/api";
+import {
+	getAgentStatus,
+	getDashboard,
+	getPerformanceHistory,
+	type AgentStatusResponse,
+} from "@/molq/api";
 import { MOLQ_VAULT } from "@/molq/contracts";
 import { useMolqVault } from "@/molq/use-molq-vault";
 
@@ -46,6 +51,7 @@ function MolqApp() {
 	const [apiError, setApiError] = useState<string | null>(null);
 	const [refreshing, setRefreshing] = useState(false);
 	const [agentStatus, setAgentStatus] = useState<AgentStatusResponse | null>(null);
+	const [performanceHistory, setPerformanceHistory] = useState<PerformanceHistory | null>(null);
 	const [getUsdeOpen, setGetUsdeOpen] = useState(false);
 
 	useEffect(() => {
@@ -64,13 +70,15 @@ function MolqApp() {
 		setRefreshing(true);
 		setApiError(null);
 		try {
-			const [nextDashboard, nextAgentStatus] = await Promise.all([
+			const [nextDashboard, nextAgentStatus, nextHistory] = await Promise.all([
 				getDashboard(),
 				getAgentStatus(),
+				getPerformanceHistory(),
 				vault.refresh(),
 			]);
 			setDashboard(nextDashboard);
 			setAgentStatus(nextAgentStatus);
+			setPerformanceHistory(nextHistory);
 		} catch (caught) {
 			setApiError(normalizeApiError(caught));
 		} finally {
@@ -172,7 +180,11 @@ function MolqApp() {
 							<Route
 								path="/performance"
 								element={
-									<PerformancePage dashboard={dashboard} status={agentStatus} />
+									<PerformancePage
+										dashboard={dashboard}
+										status={agentStatus}
+										performanceHistory={performanceHistory}
+									/>
 								}
 							/>
 							<Route
@@ -414,9 +426,11 @@ function ExecutionPage({ dashboard }: { dashboard: DashboardResponse | null }) {
 function PerformancePage({
 	dashboard,
 	status,
+	performanceHistory,
 }: {
 	dashboard: DashboardResponse | null;
 	status: AgentStatusResponse | null;
+	performanceHistory: PerformanceHistory | null;
 }) {
 	const history = status?.history ?? [];
 	const successful = history.filter((report) => report.errors.length === 0).length;
@@ -535,7 +549,89 @@ function PerformancePage({
 					</NavLink>
 				</section>
 			</div>
+
+			<PerformanceHistoryPanel history={performanceHistory} />
 		</div>
+	);
+}
+
+function PerformanceHistoryPanel({ history }: { history: PerformanceHistory | null }) {
+	const points = history?.performance?.slice(-12).reverse() ?? [];
+	const events = history?.vaultEvents?.slice(0, 6) ?? [];
+	return (
+		<section className="rounded-lg border border-border-edge bg-card">
+			<div className="flex flex-col justify-between gap-3 border-b border-border-edge px-5 py-5 sm:flex-row sm:items-center sm:px-6">
+				<div>
+					<h2 className="text-xl font-bold">Historical evidence</h2>
+					<p className="mt-1 text-sm text-label-secondary">
+						Persisted market observations and indexed vault activity.
+					</p>
+				</div>
+				<div className="text-xs text-label-secondary">
+					Indexer {history?.indexerAvailable ? "live" : "syncing"}
+				</div>
+			</div>
+			<div className="grid divide-y divide-border-edge lg:grid-cols-2 lg:divide-x lg:divide-y-0">
+				<div className="px-5 py-5 sm:px-6">
+					<div className="mb-4 text-xs font-semibold uppercase text-label-tertiary">
+						Recent APY observations
+					</div>
+					<div className="space-y-3">
+						{points.length ? (
+							points.map((point) => (
+								<div
+									key={point.timestamp}
+									className="grid grid-cols-[1fr_auto_auto] gap-4 text-sm"
+								>
+									<span className="text-label-secondary">
+										{formatTimestamp(point.timestamp)}
+									</span>
+									<span className="font-mono">
+										{point.activeProjectedApy.toFixed(2)}%
+									</span>
+									<span className="font-mono text-label-secondary">
+										{money(point.totalAssets)}
+									</span>
+								</div>
+							))
+						) : (
+							<p className="text-sm text-label-secondary">
+								Observations begin after the telemetry service is deployed.
+							</p>
+						)}
+					</div>
+				</div>
+				<div className="px-5 py-5 sm:px-6">
+					<div className="mb-4 text-xs font-semibold uppercase text-label-tertiary">
+						Onchain vault events
+					</div>
+					<div className="space-y-3">
+						{events.length ? (
+							events.map((event) => (
+								<a
+									key={event.id}
+									href={`https://mantlescan.xyz/tx/${event.transactionHash}`}
+									target="_blank"
+									rel="noreferrer"
+									className="flex items-center justify-between gap-4 text-sm hover:text-label-accent"
+								>
+									<span className="capitalize">
+										{event.type.replaceAll("_", " ")}
+									</span>
+									<span className="font-mono text-label-secondary">
+										{formatTimestamp(Number(event.blockTimestamp) * 1000)}
+									</span>
+								</a>
+							))
+						) : (
+							<p className="text-sm text-label-secondary">
+								Indexed events will appear after the refreshed indexer syncs.
+							</p>
+						)}
+					</div>
+				</div>
+			</div>
+		</section>
 	);
 }
 
@@ -1110,4 +1206,13 @@ function timeAgo(value: string): string {
 	if (elapsed < 60_000) return "just now";
 	if (elapsed < 3_600_000) return `${Math.floor(elapsed / 60_000)}m ago`;
 	return `${Math.floor(elapsed / 3_600_000)}h ago`;
+}
+
+function formatTimestamp(value: string | number): string {
+	return new Intl.DateTimeFormat("en-US", {
+		month: "short",
+		day: "numeric",
+		hour: "2-digit",
+		minute: "2-digit",
+	}).format(new Date(value));
 }

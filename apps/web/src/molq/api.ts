@@ -1,4 +1,9 @@
-import type { AgentIdentity, AgentPolicyDecision, DashboardResponse } from "@molq/shared";
+import type {
+	AgentIdentity,
+	AgentPolicyDecision,
+	DashboardResponse,
+	PerformanceHistory,
+} from "@molq/shared";
 
 export interface AgentStatusResponse {
 	enabled: boolean;
@@ -38,6 +43,10 @@ export async function getDashboard(): Promise<DashboardResponse> {
 
 export async function getAgentStatus(): Promise<AgentStatusResponse> {
 	return request<AgentStatusResponse>("/api/agent/status");
+}
+
+export async function getPerformanceHistory(): Promise<PerformanceHistory> {
+	return request<PerformanceHistory>("/api/history");
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {

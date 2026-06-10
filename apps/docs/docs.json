@@ -2,13 +2,13 @@
 	"$schema": "https://mintlify.com/docs.json",
 	"theme": "mint",
 	"name": "MolQ",
-	"description": "Documentation for the MolQ autonomous USDe yield agent on Mantle.",
+	"description": "Learn how to use and integrate with the MolQ autonomous USDe yield vault on Mantle.",
 	"colors": {
 		"primary": "#cf5a22",
 		"light": "#e86f32",
 		"dark": "#a83f14"
 	},
-	"favicon": "/favicon.svg",
+	"favicon": "/favicon.ico",
 	"navigation": {
 		"tabs": [
 			{
@@ -88,7 +88,17 @@
 	"seo": {
 		"metatags": {
 			"og:type": "website",
-			"og:site_name": "MolQ Documentation"
+			"og:site_name": "MolQ",
+			"og:title": "MolQ Documentation - Autonomous USDe Yield on Mantle",
+			"og:description": "Deposit USDe into a constrained yield strategy with live performance inputs, deterministic policy limits, and verifiable onchain decisions.",
+			"og:image": "/android-chrome-512x512.png",
+			"og:image:width": "512",
+			"og:image:height": "512",
+			"og:image:alt": "MolQ logo",
+			"twitter:card": "summary",
+			"twitter:title": "MolQ Documentation - Autonomous USDe Yield on Mantle",
+			"twitter:description": "Learn how MolQ combines an ERC-4626 vault, Aave yield, constrained AI strategy, and verifiable onchain decisions.",
+			"twitter:image": "/android-chrome-512x512.png"
 		}
 	}
 }

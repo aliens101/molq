@@ -30,8 +30,8 @@ jobs:
 
             - name: Install Foundry dependencies
               run: |
-                  forge install foundry-rs/forge-std@v1.16.0 --no-git --root contracts
-                  forge install OpenZeppelin/openzeppelin-contracts@v5.4.0 --no-git --root contracts
+                  forge --root contracts install foundry-rs/forge-std@v1.16.0 --no-git
+                  forge --root contracts install OpenZeppelin/openzeppelin-contracts@v5.4.0 --no-git
 
             - run: pnpm install --frozen-lockfile
             - run: pnpm build

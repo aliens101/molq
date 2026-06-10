@@ -11,41 +11,96 @@
 		<meta name="theme-color" content="#10130f" />
 		<meta name="application-name" content="MolQ" />
 		<meta name="apple-mobile-web-app-title" content="MolQ" />
+		<link id="canonical-url" rel="canonical" href="/" />
 		<meta property="og:type" content="website" />
 		<meta property="og:site_name" content="MolQ" />
-		<meta property="og:title" content="MolQ — Autonomous USDe Yield Agent" />
+		<meta property="og:title" content="MolQ — Autonomous USDe Yield on Mantle" />
 		<meta
 			property="og:description"
-			content="Constrained AI strategy, Aave yield, and verifiable agent decisions on Mantle."
+			content="Deposit USDe into a constrained yield strategy with live performance inputs, deterministic policy limits, and verifiable onchain decisions."
 		/>
-		<meta property="og:image" content="/android-chrome-512x512.png" />
-		<meta property="og:image:width" content="512" />
-		<meta property="og:image:height" content="512" />
-		<meta property="og:image:alt" content="MolQ logo" />
-		<meta name="twitter:card" content="summary" />
-		<meta name="twitter:title" content="MolQ — Autonomous USDe Yield Agent" />
+		<meta id="og-url" property="og:url" content="/" />
+		<meta id="og-image" property="og:image" content="/images/nokeys.png" />
+		<meta property="og:image:width" content="996" />
+		<meta property="og:image:height" content="312" />
+		<meta property="og:image:alt" content="MolQ autonomous USDe yield on Mantle" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="MolQ — Autonomous USDe Yield on Mantle" />
 		<meta
 			name="twitter:description"
-			content="Constrained AI strategy, Aave yield, and verifiable agent decisions on Mantle."
+			content="Constrained yield strategy, deterministic policy limits, and verifiable onchain decisions."
 		/>
-		<meta name="twitter:image" content="/android-chrome-512x512.png" />
-		<title>MolQ — Autonomous USDe Yield</title>
+		<meta id="twitter-image" name="twitter:image" content="/images/nokeys.png" />
+		<title>Autonomous USDe Yield on Mantle | MolQ</title>
 		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
 		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 		<link rel="manifest" href="/site.webmanifest" />
-		<script type="application/ld+json">
+		<script id="structured-data" type="application/ld+json">
 			{
 				"@context": "https://schema.org",
 				"@type": "SoftwareApplication",
 				"name": "MolQ",
 				"applicationCategory": "FinanceApplication",
 				"operatingSystem": "Web",
-				"description": "An autonomous USDe yield agent on Mantle with constrained AI decisions and verifiable on-chain evidence.",
-				"image": "/android-chrome-512x512.png",
-				"codeRepository": "https://github.com/aliens101/molq"
+				"description": "An autonomous USDe yield vault on Mantle with deterministic policy controls and verifiable onchain decisions.",
+				"codeRepository": "https://github.com/aliens101/molq",
+				"offers": {
+					"@type": "Offer",
+					"price": "0",
+					"priceCurrency": "USD",
+					"description": "No deposit or withdrawal fee. A 10% fee applies to realized vault profit."
+				}
 			}
+		</script>
+		<script type="application/ld+json">
+			{
+				"@context": "https://schema.org",
+				"@type": "FAQPage",
+				"mainEntity": [
+					{
+						"@type": "Question",
+						"name": "Where does MolQ yield come from?",
+						"acceptedAnswer": {
+							"@type": "Answer",
+							"text": "MolQ combines Aave V3 USDe supply yield on Mantle with a policy-capped hedge sleeve designed to capture positive funding carry. Returns are variable and are not guaranteed."
+						}
+					},
+					{
+						"@type": "Question",
+						"name": "Can the MolQ AI move user funds freely?",
+						"acceptedAnswer": {
+							"@type": "Answer",
+							"text": "No. The model proposes actions, while deterministic policy checks constrain allocations and execution. Deposits and redemptions are handled by the verified ERC-4626 vault."
+						}
+					},
+					{
+						"@type": "Question",
+						"name": "Is MolQ audited?",
+						"acceptedAnswer": {
+							"@type": "Answer",
+							"text": "MolQ is open source and its deployed contracts are verified, but it has not completed an independent production audit and should be treated as experimental software."
+						}
+					}
+				]
+			}
+		</script>
+		<script>
+			(() => {
+				const pageUrl = `${window.location.origin}${window.location.pathname}`;
+				const imageUrl = `${window.location.origin}/images/nokeys.png`;
+				document.getElementById("canonical-url").href = pageUrl;
+				document.getElementById("og-url").content = pageUrl;
+				document.getElementById("og-image").content = imageUrl;
+				document.getElementById("twitter-image").content = imageUrl;
+
+				const node = document.getElementById("structured-data");
+				const data = JSON.parse(node.textContent);
+				data.url = pageUrl;
+				data.image = imageUrl;
+				node.textContent = JSON.stringify(data);
+			})();
 		</script>
 	</head>
 

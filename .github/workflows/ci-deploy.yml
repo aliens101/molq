@@ -29,9 +29,10 @@ jobs:
             - uses: foundry-rs/foundry-toolchain@v1
 
             - name: Install Foundry dependencies
+              working-directory: contracts
               run: |
-                  forge --root contracts install foundry-rs/forge-std@v1.16.0 --no-git
-                  forge --root contracts install OpenZeppelin/openzeppelin-contracts@v5.4.0 --no-git
+                  forge install foundry-rs/forge-std@v1.16.0 --no-git
+                  forge install OpenZeppelin/openzeppelin-contracts@v5.4.0 --no-git
 
             - run: pnpm install --frozen-lockfile
             - run: pnpm build

@@ -111,7 +111,7 @@ a {
 	transition:
 		background-color 180ms ease,
 		color 180ms ease,
-		transform 180ms ease;
+		border-color 180ms ease;
 }
 
 .primary-button {
@@ -122,7 +122,6 @@ a {
 
 .primary-button:hover {
 	background: #fff;
-	transform: translateY(-2px);
 }
 
 .secondary-button {
@@ -143,6 +142,29 @@ a {
 	border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
+.integration-strip {
+	background: #151914;
+}
+
+.faq-answer {
+	display: grid;
+	grid-template-rows: 0fr;
+	opacity: 0;
+	transition:
+		grid-template-rows 320ms cubic-bezier(0.22, 1, 0.36, 1),
+		opacity 240ms ease;
+}
+
+.faq-answer > * {
+	min-height: 0;
+	overflow: hidden;
+}
+
+.faq-answer.is-open {
+	grid-template-rows: 1fr;
+	opacity: 1;
+}
+
 @keyframes terminal-scan {
 	from {
 		transform: translateY(-80px);
@@ -160,5 +182,12 @@ a {
 	.terminal-scanline {
 		animation: none;
 		display: none;
+	}
+
+	.faq-answer,
+	.primary-button,
+	.secondary-button,
+	.icon-button {
+		transition: none;
 	}
 }

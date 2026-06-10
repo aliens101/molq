@@ -75,6 +75,8 @@ profit is reported separately.
 - `packages/shared` - contract addresses, chain constants, and shared types.
 - `deploy` - PM2 and Nginx production configuration.
 - `scripts/deploy-vps.sh` - reproducible VPS build and release script.
+- `docs/OPERATIONS.md` - health, alerts, recovery, profit settlement, and key
+  rotation runbook.
 
 ## Mantle Contracts
 

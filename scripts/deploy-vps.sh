@@ -73,8 +73,8 @@ printf '%s\n' \
 	'fs.inotify.max_user_instances=8192' |
 	sudo tee /etc/sysctl.d/99-molq.conf >/dev/null
 sudo sysctl --system >/dev/null
-pm2 delete molq-api molq-indexer >/dev/null 2>&1 || true
-pm2 start "$REPO_DIR/deploy/ecosystem.config.cjs" --only molq-api,molq-indexer
+pm2 delete molq-api molq-indexer molq-monitor >/dev/null 2>&1 || true
+pm2 start "$REPO_DIR/deploy/ecosystem.config.cjs" --only molq-api,molq-indexer,molq-monitor
 pm2 save
 
 log "Removing old static releases"
@@ -91,5 +91,6 @@ fi
 log "Checking local services"
 wait_for_url "http://127.0.0.1:8070/api/health" 30 2
 wait_for_url "http://127.0.0.1:8071/health" 45 2
+wait_for_url "http://127.0.0.1:8070/api/health/deep" 30 2
 
 log "Deployment complete: $RELEASE_ID"

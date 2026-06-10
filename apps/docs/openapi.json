@@ -40,6 +40,17 @@
 				}
 			}
 		},
+		"/api/health/deep": {
+			"get": {
+				"tags": ["System"],
+				"summary": "Check production dependencies",
+				"operationId": "getDeepHealth",
+				"responses": {
+					"200": { "description": "All required production checks are healthy" },
+					"503": { "description": "One or more production checks are degraded" }
+				}
+			}
+		},
 		"/api/dashboard": {
 			"get": {
 				"tags": ["Portfolio"],
@@ -66,6 +77,23 @@
 				"responses": {
 					"200": {
 						"description": "Runtime, logger, identity, and recent decision reports",
+						"content": {
+							"application/json": {
+								"schema": { "type": "object", "additionalProperties": true }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/history": {
+			"get": {
+				"tags": ["Portfolio"],
+				"summary": "Get persisted performance and indexed vault history",
+				"operationId": "getHistory",
+				"responses": {
+					"200": {
+						"description": "Market observations, vault snapshots, and capital events",
 						"content": {
 							"application/json": {
 								"schema": { "type": "object", "additionalProperties": true }
@@ -154,6 +182,38 @@
 				"security": [{ "operatorKey": [] }],
 				"responses": {
 					"200": { "description": "Vault keeper result" },
+					"400": { "$ref": "#/components/responses/BadRequest" }
+				}
+			}
+		},
+		"/api/execution/vault/harden": {
+			"post": {
+				"tags": ["Execution"],
+				"summary": "Harden externally realized USDe profit",
+				"description": "Operator-only. Requires profit hardening to be explicitly enabled and the keeper to hold the requested USDe.",
+				"operationId": "hardenProfit",
+				"security": [{ "operatorKey": [] }],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"required": ["grossProfitUsd", "idempotencyKey"],
+								"properties": {
+									"grossProfitUsd": { "type": "number", "exclusiveMinimum": 0 },
+									"idempotencyKey": {
+										"type": "string",
+										"minLength": 8,
+										"maxLength": 128
+									}
+								}
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": { "description": "Profit was returned, charged, and reallocated" },
 					"400": { "$ref": "#/components/responses/BadRequest" }
 				}
 			}

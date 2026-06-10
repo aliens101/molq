@@ -164,4 +164,7 @@ The production deployment script is defensive and affects only the
 - The OpenAI-backed agent runs on a five-minute interval.
 - ERC-8004 identity and decision logging are live.
 - Ponder is synchronized with Mantle mainnet.
-- The vault currently has no deposited TVL.
+- The vault has a live mainnet deposit allocated to Aave according to policy.
+
+Hackathon positioning, demo flow, and the submission checklist are available in
+[`docs/HACKATHON_SUBMISSION.md`](docs/HACKATHON_SUBMISSION.md).

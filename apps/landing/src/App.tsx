@@ -4,6 +4,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
 	AlertTriangle,
 	ArrowRight,
+	ArrowUpRight,
+	BadgePlus,
 	BarChart3,
 	BookOpen,
 	Bot,
@@ -665,6 +667,7 @@ function Header({
 	menuOpen: boolean;
 	setMenuOpen: (open: boolean) => void;
 }) {
+	const [getUsdeOpen, setGetUsdeOpen] = useState(false);
 	const links = [
 		["Product", "#product"],
 		["Performance", "#performance"],
@@ -674,68 +677,198 @@ function Header({
 	];
 
 	return (
-		<header className="site-header fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-ink/90 backdrop-blur-xl">
-			<div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-5 lg:px-10">
-				<a href="#" className="flex items-center gap-3" aria-label="MolQ home">
-					<img
-						src="/android-chrome-192x192.png"
-						alt=""
-						className="h-9 w-9 object-cover"
-					/>
-					<span className="text-lg font-bold">MolQ</span>
-				</a>
-				<nav className="hidden items-center gap-7 text-sm text-white/60 lg:flex">
-					{links.map(([label, href]) => (
-						<a key={href} href={href} className="transition hover:text-white">
-							{label}
-						</a>
-					))}
-				</nav>
-				<div className="hidden items-center gap-3 md:flex">
-					<a
-						href={GITHUB_URL}
-						target="_blank"
-						rel="noreferrer"
-						className="icon-button magnetic"
-						aria-label="Open GitHub repository"
-						title="GitHub"
-					>
-						<Github className="h-4 w-4" />
+		<>
+			<header className="site-header fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-ink/90 backdrop-blur-xl">
+				<div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-5 lg:px-10">
+					<a href="#" className="flex items-center gap-3" aria-label="MolQ home">
+						<img
+							src="/android-chrome-192x192.png"
+							alt=""
+							className="h-9 w-9 object-cover"
+						/>
+						<span className="text-lg font-bold">MolQ</span>
 					</a>
-					<a href={APP_URL} className="primary-button magnetic">
-						Launch app
-						<ArrowRight className="h-4 w-4" />
-					</a>
-				</div>
-				<button
-					type="button"
-					className="icon-button md:hidden"
-					onClick={() => setMenuOpen(!menuOpen)}
-					aria-label={menuOpen ? "Close navigation" : "Open navigation"}
-					aria-expanded={menuOpen}
-				>
-					{menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-				</button>
-			</div>
-			{menuOpen ? (
-				<nav className="border-t border-white/10 bg-ink px-5 py-5 md:hidden">
-					{links.map(([label, href]) => (
-						<a
-							key={href}
-							href={href}
-							onClick={() => setMenuOpen(false)}
-							className="block border-b border-white/10 py-4 text-sm text-white/70"
+					<nav className="hidden items-center gap-7 text-sm text-white/60 lg:flex">
+						{links.map(([label, href]) => (
+							<a key={href} href={href} className="transition hover:text-white">
+								{label}
+							</a>
+						))}
+					</nav>
+					<div className="hidden items-center gap-3 md:flex">
+						<button
+							type="button"
+							onClick={() => setGetUsdeOpen(true)}
+							className="secondary-button magnetic"
 						>
-							{label}
+							<BadgePlus className="h-4 w-4" />
+							Get USDe
+						</button>
+						<a
+							href={GITHUB_URL}
+							target="_blank"
+							rel="noreferrer"
+							className="icon-button magnetic"
+							aria-label="Open GitHub repository"
+							title="GitHub"
+						>
+							<Github className="h-4 w-4" />
 						</a>
-					))}
-					<a href={APP_URL} className="primary-button mt-5 w-full justify-center">
-						Launch app
-						<ArrowRight className="h-4 w-4" />
-					</a>
-				</nav>
-			) : null}
-		</header>
+						<a href={APP_URL} className="primary-button magnetic">
+							Launch app
+							<ArrowRight className="h-4 w-4" />
+						</a>
+					</div>
+					<button
+						type="button"
+						className="icon-button md:hidden"
+						onClick={() => setMenuOpen(!menuOpen)}
+						aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+						aria-expanded={menuOpen}
+					>
+						{menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+					</button>
+				</div>
+				{menuOpen ? (
+					<nav className="border-t border-white/10 bg-ink px-5 py-5 md:hidden">
+						{links.map(([label, href]) => (
+							<a
+								key={href}
+								href={href}
+								onClick={() => setMenuOpen(false)}
+								className="block border-b border-white/10 py-4 text-sm text-white/70"
+							>
+								{label}
+							</a>
+						))}
+						<button
+							type="button"
+							onClick={() => {
+								setMenuOpen(false);
+								setGetUsdeOpen(true);
+							}}
+							className="secondary-button mt-5 w-full justify-center"
+						>
+							<BadgePlus className="h-4 w-4" />
+							Get USDe
+						</button>
+						<a href={APP_URL} className="primary-button mt-5 w-full justify-center">
+							Launch app
+							<ArrowRight className="h-4 w-4" />
+						</a>
+					</nav>
+				) : null}
+			</header>
+			<LandingGetUsdeDialog open={getUsdeOpen} onClose={() => setGetUsdeOpen(false)} />
+		</>
+	);
+}
+
+const usdeProviders = [
+	{
+		name: "Stargate Finance",
+		description: "Bridge supported assets into Mantle.",
+		image: "/images/stargate.png",
+		url: "https://stargate.finance/",
+	},
+	{
+		name: "Relay",
+		description: "Bridge and swap from another network.",
+		image: "/images/relay.png",
+		url: "https://relay.link/bridge",
+	},
+	{
+		name: "Merchant Moe",
+		description: "Swap assets for USDe directly on Mantle.",
+		image: "/images/merchantmoe.png",
+		url: "https://merchantmoe.com/trade",
+	},
+];
+
+function LandingGetUsdeDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+	useEffect(() => {
+		if (!open) return;
+		const onKeyDown = (event: KeyboardEvent) => {
+			if (event.key === "Escape") onClose();
+		};
+		window.addEventListener("keydown", onKeyDown);
+		return () => window.removeEventListener("keydown", onKeyDown);
+	}, [onClose, open]);
+
+	if (!open) return null;
+
+	return (
+		<div
+			className="fixed inset-0 z-[70] flex items-end justify-center bg-black/75 backdrop-blur-md sm:items-center sm:p-6"
+			role="presentation"
+			onMouseDown={(event) => {
+				if (event.target === event.currentTarget) onClose();
+			}}
+		>
+			<section
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="landing-get-usde-title"
+				className="w-full border border-white/15 bg-ink shadow-2xl sm:max-w-[540px]"
+			>
+				<header className="flex items-start justify-between border-b border-white/10 px-5 py-5 sm:px-7">
+					<div className="flex items-center gap-3">
+						<img src="/images/usde.png" alt="" className="h-11 w-11 object-contain" />
+						<div>
+							<p className="font-mono text-[10px] uppercase text-mint">
+								Fund your wallet
+							</p>
+							<h2 id="landing-get-usde-title" className="mt-1 text-2xl font-bold">
+								Get USDe on Mantle
+							</h2>
+						</div>
+					</div>
+					<button
+						type="button"
+						aria-label="Close Get USDe dialog"
+						onClick={onClose}
+						className="icon-button"
+					>
+						<X className="h-4 w-4" />
+					</button>
+				</header>
+				<div className="px-5 py-5 sm:px-7 sm:py-6">
+					<p className="mb-4 text-sm leading-6 text-white/55">
+						Choose a third-party route, set Mantle as the destination, and verify the
+						USDe token before signing.
+					</p>
+					<div className="divide-y divide-white/10 border-y border-white/10">
+						{usdeProviders.map((provider) => (
+							<a
+								key={provider.name}
+								href={provider.url}
+								target="_blank"
+								rel="noreferrer"
+								className="group flex items-center gap-4 py-4 transition-colors hover:bg-white/5 sm:px-3"
+							>
+								<span className="flex h-11 w-11 shrink-0 items-center justify-center bg-white p-1.5">
+									<img
+										src={provider.image}
+										alt={`${provider.name} logo`}
+										className="h-full w-full object-contain"
+									/>
+								</span>
+								<span className="min-w-0 flex-1">
+									<span className="block text-sm font-bold">{provider.name}</span>
+									<span className="mt-1 block text-xs text-white/45">
+										{provider.description}
+									</span>
+								</span>
+								<ArrowUpRight className="h-4 w-4 shrink-0 text-white/30 transition group-hover:text-mint" />
+							</a>
+						))}
+					</div>
+					<p className="mt-4 break-all font-mono text-[10px] leading-5 text-white/30">
+						USDe: 0x5d3a1Ff2b6BAb83b63cd9AD0787074081a52ef34
+					</p>
+				</div>
+			</section>
+		</div>
 	);
 }
 

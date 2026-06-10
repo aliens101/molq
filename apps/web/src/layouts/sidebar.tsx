@@ -20,9 +20,11 @@ export function Sidebar() {
 	return (
 		<aside className="sticky top-0 hidden h-screen w-[224px] shrink-0 self-start overflow-hidden border-r border-border-edge bg-card px-4 py-5 lg:flex lg:flex-col">
 			<NavLink to="/" className="flex items-center gap-3 px-2">
-				<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-fill-accent-primary font-bold text-label-on-light">
-					MQ
-				</div>
+				<img
+					src="/android-chrome-192x192.png"
+					alt=""
+					className="h-10 w-10 rounded-lg object-cover"
+				/>
 				<div>
 					<div className="text-lg font-bold">MolQ</div>
 					<div className="text-xs text-label-secondary">Mantle mainnet</div>

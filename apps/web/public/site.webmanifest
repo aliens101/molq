@@ -1,0 +1,22 @@
+{
+	"name": "MolQ App - Autonomous USDe Vault",
+	"short_name": "MolQ",
+	"description": "Deposit USDe, inspect live strategy allocation, and verify MolQ agent decisions on Mantle.",
+	"icons": [
+		{
+			"src": "/android-chrome-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "/android-chrome-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any"
+		}
+	],
+	"theme_color": "#140901",
+	"background_color": "#140901",
+	"display": "standalone"
+}

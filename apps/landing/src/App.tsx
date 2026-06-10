@@ -249,9 +249,11 @@ export default function App() {
 			<header className="site-header fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-ink/90 backdrop-blur-xl">
 				<div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-5 lg:px-10">
 					<a href="#" className="flex items-center gap-3" aria-label="MolQ home">
-						<span className="grid h-9 w-9 place-items-center bg-signal font-display text-sm font-bold text-ink">
-							MQ
-						</span>
+						<img
+							src="/android-chrome-192x192.png"
+							alt=""
+							className="h-9 w-9 object-cover"
+						/>
 						<span className="text-lg font-bold">MolQ</span>
 					</a>
 

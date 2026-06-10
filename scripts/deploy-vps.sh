@@ -15,6 +15,21 @@ fail() {
 	exit 1
 }
 
+wait_for_url() {
+	local url="$1"
+	local attempts="${2:-30}"
+	local delay="${3:-2}"
+
+	for ((attempt = 1; attempt <= attempts; attempt++)); do
+		if curl --fail --silent --show-error "$url" >/dev/null 2>&1; then
+			return 0
+		fi
+		sleep "$delay"
+	done
+
+	fail "Service did not become healthy: $url"
+}
+
 on_error() {
 	log "Deployment failed on line $1" >&2
 }
@@ -55,11 +70,11 @@ sudo ln -sfn "$RELEASE_DIR/app" "$WEB_ROOT/app"
 log "Reloading PM2 services"
 printf '%s\n' \
 	'fs.inotify.max_user_watches=524288' \
-	'fs.inotify.max_user_instances=1024' |
+	'fs.inotify.max_user_instances=8192' |
 	sudo tee /etc/sysctl.d/99-molq.conf >/dev/null
-sudo sysctl -w fs.inotify.max_user_watches=524288 >/dev/null
-sudo sysctl -w fs.inotify.max_user_instances=1024 >/dev/null
-pm2 startOrReload "$REPO_DIR/deploy/ecosystem.config.cjs" --update-env
+sudo sysctl --system >/dev/null
+pm2 delete molq-api molq-indexer >/dev/null 2>&1 || true
+pm2 start "$REPO_DIR/deploy/ecosystem.config.cjs" --only molq-api,molq-indexer
 pm2 save
 
 log "Removing old static releases"
@@ -74,11 +89,7 @@ if ((${#old_releases[@]} > 0)); then
 fi
 
 log "Checking local services"
-curl --fail --silent --show-error --retry 10 --retry-delay 2 \
-	--retry-connrefused \
-	"http://127.0.0.1:8070/api/health" >/dev/null
-curl --fail --silent --show-error --retry 15 --retry-delay 2 \
-	--retry-connrefused \
-	"http://127.0.0.1:8071/health" >/dev/null
+wait_for_url "http://127.0.0.1:8070/api/health" 30 2
+wait_for_url "http://127.0.0.1:8071/health" 45 2
 
 log "Deployment complete: $RELEASE_ID"

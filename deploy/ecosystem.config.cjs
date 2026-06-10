@@ -23,6 +23,8 @@ module.exports = {
 			interpreter: "none",
 			env: {
 				NODE_ENV: "production",
+				CHOKIDAR_USEPOLLING: "true",
+				CHOKIDAR_INTERVAL: "1000",
 			},
 			autorestart: true,
 			max_memory_restart: "1G",

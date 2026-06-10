@@ -1,0 +1,31 @@
+module.exports = {
+	apps: [
+		{
+			name: "molq-api",
+			cwd: "/home/cuyvps/apps/molq/apps/api",
+			script: "dist/server.js",
+			interpreter: "node",
+			env: {
+				NODE_ENV: "production",
+				HOST: "127.0.0.1",
+				PORT: "8070",
+			},
+			autorestart: true,
+			max_memory_restart: "500M",
+			time: true,
+		},
+		{
+			name: "molq-indexer",
+			cwd: "/home/cuyvps/apps/molq/apps/indexer",
+			script: "./node_modules/.bin/ponder",
+			args: "start --port 8071 --schema molq",
+			interpreter: "none",
+			env: {
+				NODE_ENV: "production",
+			},
+			autorestart: true,
+			max_memory_restart: "1G",
+			time: true,
+		},
+	],
+};

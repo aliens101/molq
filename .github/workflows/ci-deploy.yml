@@ -1,0 +1,54 @@
+name: CI and Deploy
+
+on:
+    push:
+        branches: [main]
+    workflow_dispatch:
+
+concurrency:
+    group: molq-production
+    cancel-in-progress: false
+
+jobs:
+    verify:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 10.20.0
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: pnpm
+
+            - uses: foundry-rs/foundry-toolchain@v1
+
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm build
+            - run: pnpm test
+
+    deploy:
+        needs: verify
+        runs-on: ubuntu-latest
+        environment: production
+        steps:
+            - name: Configure SSH
+              env:
+                  VPS_HOST: ${{ secrets.VPS_HOST }}
+                  VPS_PRIVATE_KEY: ${{ secrets.VPS_PRIVATE_KEY }}
+              run: |
+                  install -m 700 -d ~/.ssh
+                  printf '%s\n' "$VPS_PRIVATE_KEY" > ~/.ssh/molq_vps
+                  chmod 600 ~/.ssh/molq_vps
+                  ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
+            - name: Deploy
+              env:
+                  VPS_HOST: ${{ secrets.VPS_HOST }}
+                  VPS_USER: ${{ secrets.VPS_USER }}
+              run: |
+                  ssh -i ~/.ssh/molq_vps "$VPS_USER@$VPS_HOST" \
+                    'bash /home/cuyvps/apps/molq/scripts/deploy-vps.sh'

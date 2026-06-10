@@ -48,6 +48,9 @@ beforeEach(() => {
 					mantleYieldApy: 5.4,
 					fundingApy: 8.1,
 					estimatedNetApy: 11.4,
+					targetNetApy: 11.4,
+					shieldContributionApy: 4.59,
+					hedgeContributionApy: 6.81,
 					hedgeRatio: 98,
 					liquidityScore: 92,
 					riskScore: 28,
@@ -109,4 +112,8 @@ test("renders the MolQ portfolio and deposit workflow", async () => {
 		"href",
 		"https://stargate.finance/",
 	);
+
+	fireEvent.click(screen.getAllByRole("link", { name: "Performance" })[0]);
+	expect(screen.getByRole("heading", { name: "Performance" })).toBeInTheDocument();
+	expect(screen.getByText("Active projected APY")).toBeInTheDocument();
 });

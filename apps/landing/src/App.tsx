@@ -46,6 +46,10 @@ interface Dashboard {
 		mantleYieldApy: number;
 		fundingApy: number;
 		estimatedNetApy: number;
+		targetNetApy: number;
+		shieldContributionApy: number;
+		hedgeContributionApy: number;
+		hedgeRatio: number;
 		riskScore: number;
 		updatedAt: string;
 	};
@@ -360,7 +364,7 @@ export default function App() {
 								status={dataState}
 							/>
 							<MetricCell
-								label="Projected target APY"
+								label="Active projected APY"
 								value={dashboard ? percent(dashboard.market.estimatedNetApy) : "—"}
 								status={dataState}
 							/>
@@ -470,13 +474,19 @@ export default function App() {
 									/>
 								</div>
 
-								<div className="mt-9 grid border-l border-t border-ink/15 sm:grid-cols-3">
+								<div className="mt-9 grid border-l border-t border-ink/15 sm:grid-cols-2 lg:grid-cols-4">
 									<LightMetric
-										label="Projected target APY"
+										label="Active projected APY"
 										value={
 											dashboard
 												? percent(dashboard.market.estimatedNetApy)
 												: "—"
+										}
+									/>
+									<LightMetric
+										label="Target scenario APY"
+										value={
+											dashboard ? percent(dashboard.market.targetNetApy) : "—"
 										}
 									/>
 									<LightMetric

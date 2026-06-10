@@ -22,6 +22,14 @@ export interface AgentStatusResponse {
 		errors: string[];
 		completedAt: string;
 	};
+	history: Array<{
+		decision: AgentPolicyDecision;
+		vaultTransactionHash?: string;
+		hedgeOrderId?: string;
+		decisionTransactionHash?: string;
+		errors: string[];
+		completedAt: string;
+	}>;
 }
 
 export async function getDashboard(): Promise<DashboardResponse> {

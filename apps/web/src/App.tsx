@@ -14,6 +14,7 @@ import {
 	LayoutDashboard,
 	RefreshCw,
 	ShieldCheck,
+	TrendingUp,
 	Unplug,
 	Wallet,
 	WalletCards,
@@ -168,6 +169,12 @@ function MolqApp() {
 								}
 							/>
 							<Route path="/deposit" element={<DepositPage {...shared} />} />
+							<Route
+								path="/performance"
+								element={
+									<PerformancePage dashboard={dashboard} status={agentStatus} />
+								}
+							/>
 							<Route
 								path="/execution"
 								element={<ExecutionPage dashboard={dashboard} />}
@@ -404,6 +411,134 @@ function ExecutionPage({ dashboard }: { dashboard: DashboardResponse | null }) {
 	);
 }
 
+function PerformancePage({
+	dashboard,
+	status,
+}: {
+	dashboard: DashboardResponse | null;
+	status: AgentStatusResponse | null;
+}) {
+	const history = status?.history ?? [];
+	const successful = history.filter((report) => report.errors.length === 0).length;
+	const modelDecisions = history.filter((report) => report.decision.source === "model").length;
+	const rejectedCarry =
+		(dashboard?.market.targetNetApy ?? 0) < (dashboard?.market.estimatedNetApy ?? 0);
+
+	return (
+		<div className="space-y-8">
+			<PageHeading
+				eyebrow="Verifiable strategy evidence"
+				title="Performance"
+				description="Active exposure, benchmark comparisons, and autonomous decision outcomes from the live Mantle deployment."
+			/>
+
+			<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+				<PerformanceMetric
+					label="Active projected APY"
+					value={`${dashboard?.market.estimatedNetApy.toFixed(2) ?? "0.00"}%`}
+					detail="Only currently deployed exposure"
+					positive={(dashboard?.market.estimatedNetApy ?? 0) >= 0}
+				/>
+				<PerformanceMetric
+					label="Aave reserve APY"
+					value={`${dashboard?.market.mantleYieldApy.toFixed(2) ?? "0.00"}%`}
+					detail="Unweighted USDe benchmark"
+					positive
+				/>
+				<PerformanceMetric
+					label="Target scenario APY"
+					value={`${dashboard?.market.targetNetApy.toFixed(2) ?? "0.00"}%`}
+					detail={rejectedCarry ? "Rejected by carry policy" : "Eligible opportunity"}
+					positive={!rejectedCarry}
+				/>
+				<PerformanceMetric
+					label="Active hedge"
+					value={`${dashboard?.market.hedgeRatio.toFixed(0) ?? "0"}%`}
+					detail={`${money(dashboard?.hedgeExecution?.currentShortNotionalUsd ?? 0)} short notional`}
+					positive={(dashboard?.market.hedgeRatio ?? 0) > 0}
+				/>
+			</div>
+
+			<div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+				<section className="rounded-lg border border-border-edge bg-card">
+					<div className="border-b border-border-edge px-5 py-5 sm:px-6">
+						<h2 className="text-xl font-bold">Live return composition</h2>
+						<p className="mt-1 text-sm text-label-secondary">
+							Projected annualized contribution from actual deployed exposure.
+						</p>
+					</div>
+					<div className="grid gap-px bg-border-edge sm:grid-cols-3">
+						<CompositionCell
+							label="Aave shield"
+							value={`${dashboard?.market.shieldContributionApy.toFixed(2) ?? "0.00"}%`}
+							detail={`${dashboard?.portfolio.allocation.shieldPercent.toFixed(1) ?? "0.0"}% of TVL`}
+						/>
+						<CompositionCell
+							label="Bybit hedge"
+							value={`${dashboard?.market.hedgeContributionApy.toFixed(2) ?? "0.00"}%`}
+							detail={
+								dashboard?.market.hedgeRatio
+									? "Funding contribution active"
+									: "No short position open"
+							}
+						/>
+						<CompositionCell
+							label="Realized profit"
+							value={money(dashboard?.portfolio.realizedProfit ?? 0)}
+							detail="Excludes projected yield"
+						/>
+					</div>
+					<div className="px-5 py-5 sm:px-6">
+						<div
+							className={`flex gap-3 border p-4 ${
+								rejectedCarry
+									? "border-positive/20 bg-positive-secondary text-positive"
+									: "border-border-quaternary bg-fill-quaternary"
+							}`}
+						>
+							<ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
+							<p className="text-sm leading-6">
+								{rejectedCarry
+									? "MolQ is preserving positive Aave carry and keeping the hedge flat because current short funding would reduce expected return."
+									: "Current funding meets the strategy threshold; hedge execution remains bounded by liquid capital and operator limits."}
+							</p>
+						</div>
+					</div>
+				</section>
+
+				<section className="rounded-lg border border-border-edge bg-card px-5 py-6 sm:px-6">
+					<h2 className="text-xl font-bold">Agent scorecard</h2>
+					<p className="mt-1 text-sm text-label-secondary">
+						Runtime history since the latest API restart.
+					</p>
+					<div className="mt-6 space-y-4">
+						<FeeRow label="Observed cycles" value={String(history.length)} />
+						<FeeRow label="Model decisions" value={String(modelDecisions)} />
+						<FeeRow
+							label="Successful cycles"
+							value={
+								history.length
+									? `${Math.round((successful / history.length) * 100)}%`
+									: "--"
+							}
+						/>
+						<FeeRow
+							label="On-chain logger"
+							value={status?.logger?.authorized ? "Authorized" : "Unavailable"}
+						/>
+					</div>
+					<NavLink
+						to="/agent"
+						className="mt-6 flex h-11 items-center justify-center border border-border-quaternary bg-fill-quaternary text-sm font-semibold hover:text-label-accent"
+					>
+						Inspect decision proof
+					</NavLink>
+				</section>
+			</div>
+		</div>
+	);
+}
+
 function AgentPage({
 	status,
 	dashboard,
@@ -413,7 +548,7 @@ function AgentPage({
 }) {
 	const lastRun = status?.lastRun;
 	const identity = status?.identity;
-	const loggerReady = Boolean(status?.logger.enabled && status.logger.authorized);
+	const loggerReady = Boolean(status?.logger?.enabled && status.logger.authorized);
 	const bybitReady = Boolean(
 		dashboard?.hedgeExecution?.configured && dashboard.hedgeExecution.tradingEnabled,
 	);
@@ -447,7 +582,7 @@ function AgentPage({
 					icon={ShieldCheck}
 					label="Decision logger"
 					value={loggerReady ? "Authorized" : "Disarmed"}
-					detail={status?.logger.message ?? "Checking signer"}
+					detail={status?.logger?.message ?? "Checking signer"}
 					ready={loggerReady}
 				/>
 				<AgentMetric
@@ -563,6 +698,106 @@ function AgentPage({
 					</a>
 				</section>
 			) : null}
+
+			{status?.history?.length ? (
+				<section className="rounded-lg border border-border-edge bg-card">
+					<div className="border-b border-border-edge px-5 py-5 sm:px-6">
+						<h2 className="text-xl font-bold">Recent execution evidence</h2>
+						<p className="mt-1 text-sm text-label-secondary">
+							Model outcomes, safety intervention, and immutable decision links.
+						</p>
+					</div>
+					<div className="divide-y divide-border-edge">
+						{status.history.slice(0, 8).map((report) => (
+							<div
+								key={report.decision.id}
+								className="grid gap-4 px-5 py-5 sm:px-6 lg:grid-cols-[130px_1fr_130px]"
+							>
+								<div>
+									<span className="inline-flex bg-fill-accent-secondary px-2 py-1 text-[10px] font-bold uppercase text-label-accent">
+										{report.decision.action.replaceAll("_", " ")}
+									</span>
+									<div className="mt-2 text-xs text-label-tertiary">
+										{timeAgo(report.completedAt)}
+									</div>
+								</div>
+								<div>
+									<p className="text-sm leading-6">{report.decision.reason}</p>
+									{report.decision.safetyChecks.length ? (
+										<p className="mt-2 text-xs text-orange">
+											Policy: {report.decision.safetyChecks.join(" ")}
+										</p>
+									) : null}
+									{report.errors.length ? (
+										<p className="mt-2 text-xs text-negative">
+											Execution: {report.errors.join(" ")}
+										</p>
+									) : null}
+								</div>
+								<div className="lg:text-right">
+									<div className="text-xs text-label-secondary">
+										Risk {report.decision.riskScore}/100
+									</div>
+									{report.decisionTransactionHash ? (
+										<a
+											href={`https://mantlescan.xyz/tx/${report.decisionTransactionHash}`}
+											target="_blank"
+											rel="noreferrer"
+											className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-label-accent"
+										>
+											Verify
+											<ExternalLink className="h-3 w-3" />
+										</a>
+									) : null}
+								</div>
+							</div>
+						))}
+					</div>
+				</section>
+			) : null}
+		</div>
+	);
+}
+
+function PerformanceMetric({
+	label,
+	value,
+	detail,
+	positive,
+}: {
+	label: string;
+	value: string;
+	detail: string;
+	positive: boolean;
+}) {
+	return (
+		<div className="rounded-lg border border-border-edge bg-card px-5 py-5">
+			<div className="text-xs text-label-secondary">{label}</div>
+			<div className="mt-3 flex items-center gap-2">
+				<div className="font-mono text-2xl font-bold">{value}</div>
+				<span
+					className={`h-2 w-2 rounded-full ${positive ? "bg-positive" : "bg-orange"}`}
+				/>
+			</div>
+			<div className="mt-2 text-xs text-label-tertiary">{detail}</div>
+		</div>
+	);
+}
+
+function CompositionCell({
+	label,
+	value,
+	detail,
+}: {
+	label: string;
+	value: string;
+	detail: string;
+}) {
+	return (
+		<div className="bg-card px-5 py-5">
+			<div className="text-xs text-label-secondary">{label}</div>
+			<div className="mt-2 font-mono text-xl font-bold">{value}</div>
+			<div className="mt-2 text-xs text-label-tertiary">{detail}</div>
 		</div>
 	);
 }
@@ -712,6 +947,7 @@ function MobileNavigation() {
 	const items = [
 		{ to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
 		{ to: "/deposit", label: "Deposit", icon: WalletCards },
+		{ to: "/performance", label: "Performance", icon: TrendingUp },
 		{ to: "/execution", label: "Execution", icon: Activity },
 		{ to: "/agent", label: "Agent", icon: Bot },
 	];

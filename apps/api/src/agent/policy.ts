@@ -7,7 +7,7 @@ const proposalSchema = z.object({
 	targetHedgeNotionalUsd: z.number().finite().nonnegative(),
 	confidence: z.number().finite().min(0).max(1),
 	riskScore: z.number().finite().min(0).max(100),
-	reason: z.string().trim().min(1).max(280),
+	reason: z.string().trim().min(1).max(500),
 });
 
 export type AgentProposal = z.infer<typeof proposalSchema>;
@@ -19,6 +19,7 @@ export interface AgentModel {
 
 export interface AgentPolicyConfig {
 	maxHedgeNotionalUsd: number;
+	minHedgeNotionalUsd: number;
 	maxMarketRiskScore: number;
 	minFundingApy: number;
 	rebalanceDriftPercent: number;
@@ -26,6 +27,7 @@ export interface AgentPolicyConfig {
 
 const defaultConfig: AgentPolicyConfig = {
 	maxHedgeNotionalUsd: 10_000,
+	minHedgeNotionalUsd: 10,
 	maxMarketRiskScore: 65,
 	minFundingApy: 1,
 	rebalanceDriftPercent: 1,
@@ -45,6 +47,7 @@ export class AgentPolicy {
 		const model = OpenAIResponsesModel.fromEnv();
 		return new AgentPolicy(model, {
 			maxHedgeNotionalUsd: Number(process.env.BYBIT_MAX_NOTIONAL_USD ?? 10_000),
+			minHedgeNotionalUsd: Number(process.env.MOLQ_AGENT_MIN_HEDGE_NOTIONAL_USD ?? 10),
 			maxMarketRiskScore: Number(process.env.MOLQ_AGENT_MAX_RISK_SCORE ?? 65),
 			minFundingApy: Number(process.env.MOLQ_AGENT_MIN_FUNDING_APY ?? 1),
 			rebalanceDriftPercent: Number(process.env.MOLQ_AGENT_REBALANCE_DRIFT_PERCENT ?? 1),
@@ -108,7 +111,7 @@ export class OpenAIResponsesModel implements AgentModel {
 				model: this.name,
 				store: false,
 				instructions:
-					"You are MolQ's portfolio strategist. Preserve principal, prefer positive carry, and choose the least risky justified action.",
+					"You are MolQ's portfolio strategist. Preserve principal, prefer positive carry, and choose the least risky justified action. All APY fields are already percentage values: 0.61 means 0.61%, not 61%. For an ETHUSDT short, positive funding is income and negative funding is a cost. Never describe negative short funding as positive carry. Do not recommend uneconomic dust trades.",
 				input: `Evaluate this live portfolio snapshot: ${JSON.stringify(snapshot)}`,
 				text: {
 					format: {
@@ -125,7 +128,7 @@ export class OpenAIResponsesModel implements AgentModel {
 								targetHedgeNotionalUsd: { type: "number", minimum: 0 },
 								confidence: { type: "number", minimum: 0, maximum: 1 },
 								riskScore: { type: "number", minimum: 0, maximum: 100 },
-								reason: { type: "string", minLength: 1, maxLength: 280 },
+								reason: { type: "string", minLength: 1, maxLength: 500 },
 							},
 							required: [
 								"action",
@@ -191,7 +194,7 @@ function deterministicProposal(
 		snapshot.alphaMarketLive &&
 		snapshot.bybitFundingApy >= config.minFundingApy &&
 		snapshot.marketRiskScore <= config.maxMarketRiskScore &&
-		snapshot.liquidAssetsUsd > 0;
+		snapshot.liquidAssetsUsd >= config.minHedgeNotionalUsd;
 	const action: AgentAction =
 		rebalance && hedge
 			? "rebalance_and_hedge"
@@ -226,7 +229,8 @@ function constrainProposal(
 		snapshot.alphaMarketLive &&
 		snapshot.bybitFundingApy >= config.minFundingApy &&
 		snapshot.marketRiskScore <= config.maxMarketRiskScore &&
-		snapshot.liquidityScore >= 50;
+		snapshot.liquidityScore >= 50 &&
+		snapshot.liquidAssetsUsd >= config.minHedgeNotionalUsd;
 	const wantsRebalance =
 		proposal.action === "rebalance" || proposal.action === "rebalance_and_hedge";
 	const wantsHedge = proposal.action === "hedge" || proposal.action === "rebalance_and_hedge";
@@ -236,6 +240,9 @@ function constrainProposal(
 	}
 	if (wantsHedge && !canHedge) {
 		safetyChecks.push("Hedge removed because carry, risk, or market freshness failed.");
+	}
+	if (wantsHedge && snapshot.liquidAssetsUsd < config.minHedgeNotionalUsd) {
+		safetyChecks.push("Hedge removed because liquid capital is below the economic minimum.");
 	}
 
 	const rebalance = wantsRebalance && canRebalance;

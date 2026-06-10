@@ -18,6 +18,7 @@ const snapshot: AgentPolicySnapshot = {
 
 const config = {
 	maxHedgeNotionalUsd: 1_500,
+	minHedgeNotionalUsd: 10,
 	maxMarketRiskScore: 65,
 	minFundingApy: 1,
 	rebalanceDriftPercent: 1,
@@ -75,6 +76,29 @@ describe("AgentPolicy", () => {
 		expect(decision.targetHedgeNotionalUsd).toBe(0);
 	});
 
+	it("blocks uneconomic dust hedges", async () => {
+		const model: AgentModel = {
+			name: "test-model",
+			propose: vi.fn().mockResolvedValue({
+				action: "hedge",
+				targetHedgeNotionalUsd: 0.03,
+				confidence: 0.9,
+				riskScore: 20,
+				reason: "Open a tiny hedge.",
+			}),
+		};
+
+		const decision = await new AgentPolicy(model, config).decide({
+			...snapshot,
+			liquidAssetsUsd: 0.03,
+		});
+
+		expect(decision.action).toBe("hold");
+		expect(decision.safetyChecks).toContain(
+			"Hedge removed because liquid capital is below the economic minimum.",
+		);
+	});
+
 	it("falls back when model output is invalid", async () => {
 		const model: AgentModel = {
 			name: "test-model",
@@ -116,11 +140,13 @@ describe("AgentPolicy", () => {
 		const proposal = await model.propose(snapshot);
 		const request = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)) as {
 			store: boolean;
+			instructions: string;
 			text: { format: { type: string; strict: boolean } };
 		};
 
 		expect(proposal.action).toBe("hold");
 		expect(request.store).toBe(false);
+		expect(request.instructions).toContain("0.61 means 0.61%");
 		expect(request.text.format).toMatchObject({ type: "json_schema", strict: true });
 		fetchMock.mockRestore();
 	});

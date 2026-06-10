@@ -4,6 +4,7 @@ import {
 	Activity,
 	ArrowDownToLine,
 	ArrowUpFromLine,
+	BadgePlus,
 	Bot,
 	CheckCircle2,
 	CircleDollarSign,
@@ -21,6 +22,7 @@ import { BrowserRouter, NavLink, Navigate, Route, Routes } from "react-router-do
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ExecutionTable } from "@/features/vault/ExecutionTable";
+import { GetUsdeDialog } from "@/features/vault/GetUsdeDialog";
 import { TransactionStepperDialog } from "@/features/vault/TransactionStepperDialog";
 import { VaultSummary } from "@/features/vault/VaultSummary";
 import { Sidebar } from "@/layouts/sidebar";
@@ -43,6 +45,7 @@ function MolqApp() {
 	const [apiError, setApiError] = useState<string | null>(null);
 	const [refreshing, setRefreshing] = useState(false);
 	const [agentStatus, setAgentStatus] = useState<AgentStatusResponse | null>(null);
+	const [getUsdeOpen, setGetUsdeOpen] = useState(false);
 
 	useEffect(() => {
 		void loadDashboard();
@@ -96,6 +99,7 @@ function MolqApp() {
 				error={vault.error}
 				onClose={vault.closeTransactionFlow}
 			/>
+			<GetUsdeDialog open={getUsdeOpen} onClose={() => setGetUsdeOpen(false)} />
 			<div className="mx-auto flex min-h-screen max-w-[1680px]">
 				<Sidebar />
 
@@ -111,7 +115,22 @@ function MolqApp() {
 								/>
 								Mantle mainnet
 							</div>
-							<WalletControl vault={vault} />
+							<div className="flex min-w-0 items-center gap-2">
+								<UsdeBalanceBadge
+									balance={walletBalance}
+									connected={vault.isConnected}
+								/>
+								<Button
+									size="sm"
+									variant="outline"
+									onClick={() => setGetUsdeOpen(true)}
+									className="rounded-lg border-border-quaternary bg-fill-quaternary px-3 font-bold hover:bg-fill-accent-secondary hover:text-label-accent"
+								>
+									<BadgePlus className="h-4 w-4 sm:mr-2" />
+									<span className="hidden sm:inline">Get USDe</span>
+								</Button>
+								<WalletControl vault={vault} />
+							</div>
 						</div>
 					</header>
 
@@ -717,6 +736,25 @@ function MobileNavigation() {
 				</NavLink>
 			))}
 		</nav>
+	);
+}
+
+function UsdeBalanceBadge({ balance, connected }: { balance: number; connected: boolean }) {
+	return (
+		<div
+			className="flex h-9 items-center gap-2 border border-border-edge bg-card px-2.5"
+			title={
+				connected ? `${number(balance)} USDe in wallet` : "Connect wallet to view balance"
+			}
+		>
+			<img src="/images/usde.png" alt="USDe" className="h-5 w-5 object-contain" />
+			<span className="font-mono text-xs font-bold">
+				{connected ? number(balance) : "--"}
+			</span>
+			<span className="hidden text-[10px] font-semibold text-label-secondary xl:inline">
+				USDe
+			</span>
+		</div>
 	);
 }
 

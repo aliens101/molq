@@ -55,6 +55,17 @@ export const vaultAccount = onchainTable("vault_account", (t) => ({
 
 export const vaultSnapshot = onchainTable("vault_snapshot", (t) => ({
 	id: t.text().primaryKey(),
+	trigger: t.text().notNull(),
+	shieldBalance: t.bigint().notNull(),
+	alphaBalance: t.bigint().notNull(),
+	totalAssets: t.bigint().notNull(),
+	blockNumber: t.bigint().notNull(),
+	blockTimestamp: t.bigint().notNull(),
+	transactionHash: t.hex().notNull(),
+}));
+
+export const vaultState = onchainTable("vault_state", (t) => ({
+	id: t.text().primaryKey(),
 	shieldBalance: t.bigint().notNull(),
 	alphaBalance: t.bigint().notNull(),
 	totalAssets: t.bigint().notNull(),

@@ -6,7 +6,9 @@ import {
 	vaultAccount,
 	vaultEvent,
 	vaultSnapshot,
+	vaultState,
 } from "ponder:schema";
+import { MolqVaultAbi } from "../abis/MolqVaultAbi";
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";
 const molqAgentId = 112n;
@@ -103,6 +105,7 @@ ponder.on("MolqVault:Deposit", async ({ event, context }) => {
 		assets: event.args.assets,
 		shares: event.args.shares,
 	});
+	await recordVaultSnapshot(context, event, "deposit");
 });
 
 ponder.on("MolqVault:Withdraw", async ({ event, context }) => {
@@ -112,6 +115,7 @@ ponder.on("MolqVault:Withdraw", async ({ event, context }) => {
 		assets: event.args.assets,
 		shares: event.args.shares,
 	});
+	await recordVaultSnapshot(context, event, "withdraw");
 });
 
 ponder.on("MolqVault:Transfer", async ({ event, context }) => {
@@ -159,31 +163,12 @@ ponder.on("MolqVault:ShieldRedeemed", async ({ event, context }) => {
 });
 
 ponder.on("MolqVault:Rebalanced", async ({ event, context }) => {
-	const totalAssets = event.args.shieldAssets + event.args.liquidAssets;
 	await insertVaultEvent(context, event, {
 		type: "rebalanced",
 		shieldBalance: event.args.shieldAssets,
 		alphaBalance: event.args.liquidAssets,
 	});
-	await context.db
-		.insert(vaultSnapshot)
-		.values({
-			id: "latest",
-			shieldBalance: event.args.shieldAssets,
-			alphaBalance: event.args.liquidAssets,
-			totalAssets,
-			blockNumber: event.block.number,
-			blockTimestamp: event.block.timestamp,
-			transactionHash: event.transaction.hash,
-		})
-		.onConflictDoUpdate({
-			shieldBalance: event.args.shieldAssets,
-			alphaBalance: event.args.liquidAssets,
-			totalAssets,
-			blockNumber: event.block.number,
-			blockTimestamp: event.block.timestamp,
-			transactionHash: event.transaction.hash,
-		});
+	await recordVaultSnapshot(context, event, "rebalance");
 });
 
 ponder.on("MolqVault:ProfitHardened", async ({ event, context }) => {
@@ -193,6 +178,7 @@ ponder.on("MolqVault:ProfitHardened", async ({ event, context }) => {
 		amount: event.args.feeAssets,
 		alphaBalance: event.args.netProfit,
 	});
+	await recordVaultSnapshot(context, event, "profit_hardened");
 });
 
 ponder.on("MolqVault:EmergencyExit", async ({ event, context }) => {
@@ -201,6 +187,7 @@ ponder.on("MolqVault:EmergencyExit", async ({ event, context }) => {
 		assets: event.args.assets,
 		shares: event.args.shares,
 	});
+	await recordVaultSnapshot(context, event, "emergency_exit");
 });
 
 ponder.on("MolqVault:KeeperUpdated", async ({ event, context }) => {
@@ -244,6 +231,49 @@ async function insertVaultEvent(
 		transactionHash: event.transaction.hash,
 		logIndex: event.log.logIndex,
 	});
+}
+
+async function recordVaultSnapshot(
+	context: Parameters<Parameters<typeof ponder.on>[1]>[0]["context"],
+	event: Parameters<Parameters<typeof ponder.on>[1]>[0]["event"],
+	trigger: string,
+) {
+	const address = event.log.address;
+	const [totalAssets, shieldBalance, alphaBalance] = await Promise.all([
+		context.client.readContract({
+			address,
+			abi: MolqVaultAbi,
+			functionName: "totalAssets",
+		}),
+		context.client.readContract({
+			address,
+			abi: MolqVaultAbi,
+			functionName: "shieldAssets",
+		}),
+		context.client.readContract({
+			address,
+			abi: MolqVaultAbi,
+			functionName: "liquidAssets",
+		}),
+	]);
+	const snapshot = {
+		shieldBalance,
+		alphaBalance,
+		totalAssets,
+		blockNumber: event.block.number,
+		blockTimestamp: event.block.timestamp,
+		transactionHash: event.transaction.hash,
+	};
+
+	await context.db.insert(vaultSnapshot).values({
+		id: eventKey(event),
+		trigger,
+		...snapshot,
+	});
+	await context.db
+		.insert(vaultState)
+		.values({ id: "latest", ...snapshot })
+		.onConflictDoUpdate(snapshot);
 }
 
 function eventKey(event: { transaction: { hash: string }; log: { logIndex: number } }) {

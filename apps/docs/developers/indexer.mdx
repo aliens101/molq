@@ -51,7 +51,7 @@ query VaultAccount($address: String!) {
 
 ```graphql
 query LatestAllocation {
-	vaultSnapshot(id: "latest") {
+	vaultState(id: "latest") {
 		shieldBalance
 		alphaBalance
 		totalAssets
@@ -60,6 +60,10 @@ query LatestAllocation {
 	}
 }
 ```
+
+Historical snapshots are available through `vaultSnapshots`. Each row includes
+the event `trigger`, block, transaction hash, and exact vault state read at that
+block.
 
 All token amounts are returned as integer base units. USDe and `mqUSDe` use 18
 decimals.

@@ -1,5 +1,26 @@
 export const MolqVaultAbi = [
 	{
+		type: "function",
+		name: "totalAssets",
+		stateMutability: "view",
+		inputs: [],
+		outputs: [{ type: "uint256" }],
+	},
+	{
+		type: "function",
+		name: "shieldAssets",
+		stateMutability: "view",
+		inputs: [],
+		outputs: [{ type: "uint256" }],
+	},
+	{
+		type: "function",
+		name: "liquidAssets",
+		stateMutability: "view",
+		inputs: [],
+		outputs: [{ type: "uint256" }],
+	},
+	{
 		type: "event",
 		name: "Deposit",
 		inputs: [

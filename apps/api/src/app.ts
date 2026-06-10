@@ -3,7 +3,7 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { z } from "zod";
 import { AgentRuntime } from "./agent/runtime.js";
 import { getAgentIdentity } from "./agent/identity.js";
-import { getLiveDashboard } from "./dashboard.js";
+import { applyHedgeProjection, getLiveDashboard } from "./dashboard.js";
 import { BybitHedgeExecutor } from "./execution/hedge-executor.js";
 import { VaultKeeper } from "./execution/vault-keeper.js";
 import { getProtocolMarkets } from "./integrations/markets.js";
@@ -108,9 +108,10 @@ function setCors(response: ServerResponse) {
 
 async function withExecution(hedgeExecutor: BybitHedgeExecutor) {
 	const dashboard = await getLiveDashboard();
+	const hedgeExecution = await hedgeExecutor.status(dashboard.portfolio.alphaBalance);
 	return {
-		...dashboard,
-		hedgeExecution: await hedgeExecutor.status(dashboard.portfolio.alphaBalance),
+		...applyHedgeProjection(dashboard, hedgeExecution.currentShortNotionalUsd),
+		hedgeExecution,
 	};
 }
 

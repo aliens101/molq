@@ -25,6 +25,9 @@ export interface MarketSnapshot {
 	mantleYieldApy: number;
 	fundingApy: number;
 	estimatedNetApy: number;
+	targetNetApy: number;
+	shieldContributionApy: number;
+	hedgeContributionApy: number;
 	hedgeRatio: number;
 	liquidityScore: number;
 	riskScore: number;

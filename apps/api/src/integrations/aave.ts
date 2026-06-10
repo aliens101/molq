@@ -1,12 +1,12 @@
 import {
 	AAVE_MANTLE_DATA_PROVIDER,
 	AAVE_MANTLE_USDE_ATOKEN,
-	MANTLE_RPC_URL,
 	MANTLE_USDE,
 	type ShieldMarket,
 } from "@molq/shared";
-import { createPublicClient, formatUnits, http, type PublicClient } from "viem";
+import { createPublicClient, formatUnits, type PublicClient } from "viem";
 import { mantle } from "viem/chains";
+import { mantleTransport } from "../mantle-client.js";
 
 const RAY = 1e27;
 
@@ -50,9 +50,7 @@ export function rayRateToApy(liquidityRate: bigint): number {
 export async function getAaveUsdeMarket(
 	client: PublicClient = createPublicClient({
 		chain: mantle,
-		transport: http(process.env.MANTLE_RPC_URL ?? MANTLE_RPC_URL, {
-			timeout: 5_000,
-		}),
+		transport: mantleTransport(),
 	}),
 ): Promise<ShieldMarket> {
 	const [reserveData, availableLiquidity] = await Promise.all([

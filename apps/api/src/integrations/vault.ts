@@ -1,6 +1,7 @@
-import { MANTLE_CHAIN_ID, MANTLE_RPC_URL, MOLQ_VAULT, type Portfolio } from "@molq/shared";
-import { createPublicClient, formatUnits, http, type PublicClient } from "viem";
+import { MANTLE_CHAIN_ID, MOLQ_VAULT, type Portfolio } from "@molq/shared";
+import { createPublicClient, formatUnits, type PublicClient } from "viem";
 import { mantle } from "viem/chains";
+import { mantleTransport } from "../mantle-client.js";
 
 const vaultAbi = [
 	{
@@ -38,7 +39,7 @@ export interface VaultState {
 export async function getVaultState(
 	client: PublicClient = createPublicClient({
 		chain: mantle,
-		transport: http(process.env.MANTLE_RPC_URL ?? MANTLE_RPC_URL),
+		transport: mantleTransport(),
 	}),
 ): Promise<VaultState> {
 	const [totalAssets, shieldAssets, liquidAssets] = await Promise.all([

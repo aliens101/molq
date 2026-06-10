@@ -1,8 +1,7 @@
-import { MANTLE_RPC_URL, MOLQ_VAULT } from "@molq/shared";
+import { MOLQ_VAULT } from "@molq/shared";
 import {
 	createPublicClient,
 	createWalletClient,
-	http,
 	type Hash,
 	type Hex,
 	type PublicClient,
@@ -10,6 +9,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { mantle } from "viem/chains";
+import { mantleTransport } from "../mantle-client.js";
 
 const BPS = 10_000n;
 const vaultAbi = [
@@ -80,15 +80,15 @@ export class VaultKeeper {
 		private readonly walletClient?: WalletClient,
 		private readonly publicClient: PublicClient = createPublicClient({
 			chain: mantle,
-			transport: http(process.env.MANTLE_RPC_URL ?? MANTLE_RPC_URL),
+			transport: mantleTransport(),
 		}),
 		private readonly maxSlippageBps = 10n,
 	) {}
 
 	static fromEnv(): VaultKeeper {
 		const privateKey = process.env.MOLQ_KEEPER_PRIVATE_KEY as Hex | undefined;
-		const rpcUrl = process.env.MANTLE_RPC_URL ?? MANTLE_RPC_URL;
-		const publicClient = createPublicClient({ chain: mantle, transport: http(rpcUrl) });
+		const transport = mantleTransport();
+		const publicClient = createPublicClient({ chain: mantle, transport });
 		if (!privateKey) {
 			return new VaultKeeper(false, undefined, publicClient);
 		}
@@ -96,7 +96,7 @@ export class VaultKeeper {
 		const account = privateKeyToAccount(privateKey);
 		return new VaultKeeper(
 			process.env.MOLQ_KEEPER_ENABLED === "true",
-			createWalletClient({ account, chain: mantle, transport: http(rpcUrl) }),
+			createWalletClient({ account, chain: mantle, transport }),
 			publicClient,
 			BigInt(process.env.MOLQ_KEEPER_MAX_SLIPPAGE_BPS ?? 10),
 		);

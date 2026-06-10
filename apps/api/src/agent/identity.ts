@@ -1,11 +1,7 @@
-import {
-	ERC8004_IDENTITY_REGISTRY,
-	MANTLE_RPC_URL,
-	MOLQ_AGENT_ID,
-	type AgentIdentity,
-} from "@molq/shared";
-import { createPublicClient, http, type PublicClient } from "viem";
+import { ERC8004_IDENTITY_REGISTRY, MOLQ_AGENT_ID, type AgentIdentity } from "@molq/shared";
+import { createPublicClient, type PublicClient } from "viem";
 import { mantle } from "viem/chains";
+import { mantleTransport } from "../mantle-client.js";
 
 const identityRegistryAbi = [
 	{
@@ -40,7 +36,7 @@ interface RegistrationFile {
 export async function getAgentIdentity(
 	client: PublicClient = createPublicClient({
 		chain: mantle,
-		transport: http(process.env.MANTLE_RPC_URL ?? MANTLE_RPC_URL),
+		transport: mantleTransport(),
 	}),
 ): Promise<AgentIdentity> {
 	const agentId = BigInt(process.env.MOLQ_AGENT_ID ?? MOLQ_AGENT_ID);

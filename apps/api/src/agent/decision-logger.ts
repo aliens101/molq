@@ -1,8 +1,7 @@
-import { MANTLE_RPC_URL, MOLQ_DECISION_LOGGER, type AgentPolicyDecision } from "@molq/shared";
+import { MOLQ_DECISION_LOGGER, type AgentPolicyDecision } from "@molq/shared";
 import {
 	createPublicClient,
 	createWalletClient,
-	http,
 	keccak256,
 	parseUnits,
 	toBytes,
@@ -13,6 +12,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { mantle } from "viem/chains";
+import { mantleTransport } from "../mantle-client.js";
 
 const decisionLoggerAbi = [
 	{
@@ -53,14 +53,14 @@ export class DecisionLoggerClient {
 		private readonly walletClient?: WalletClient,
 		private readonly publicClient: PublicClient = createPublicClient({
 			chain: mantle,
-			transport: http(process.env.MANTLE_RPC_URL ?? MANTLE_RPC_URL),
+			transport: mantleTransport(),
 		}),
 	) {}
 
 	static fromEnv(): DecisionLoggerClient {
 		const privateKey = process.env.MOLQ_AGENT_PRIVATE_KEY as Hex | undefined;
-		const rpcUrl = process.env.MANTLE_RPC_URL ?? MANTLE_RPC_URL;
-		const publicClient = createPublicClient({ chain: mantle, transport: http(rpcUrl) });
+		const transport = mantleTransport();
+		const publicClient = createPublicClient({ chain: mantle, transport });
 		if (!privateKey) {
 			return new DecisionLoggerClient(false, undefined, publicClient);
 		}
@@ -68,7 +68,7 @@ export class DecisionLoggerClient {
 		const account = privateKeyToAccount(privateKey);
 		return new DecisionLoggerClient(
 			process.env.MOLQ_AGENT_WRITES_ENABLED === "true",
-			createWalletClient({ account, chain: mantle, transport: http(rpcUrl) }),
+			createWalletClient({ account, chain: mantle, transport }),
 			publicClient,
 		);
 	}

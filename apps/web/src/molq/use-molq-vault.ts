@@ -14,6 +14,24 @@ import { erc20Abi, MOLQ_VAULT, molqVaultAbi, USDE } from "@/molq/contracts";
 
 const USDE_DECIMALS = 18;
 
+export type TransactionStepStatus = "pending" | "active" | "complete" | "error";
+
+export interface TransactionStep {
+	id: "network" | "approval" | "deposit" | "redeem";
+	label: string;
+	description: string;
+	status: TransactionStepStatus;
+	hash?: Hash;
+}
+
+export interface TransactionFlow {
+	action: "deposit" | "withdraw";
+	amount: string;
+	open: boolean;
+	complete: boolean;
+	steps: TransactionStep[];
+}
+
 export function useMolqVault() {
 	const account = useAccount();
 	const { connectors, connectAsync, isPending: isConnecting } = useConnect();
@@ -24,6 +42,7 @@ export function useMolqVault() {
 	const [pendingAction, setPendingAction] = useState<"deposit" | "withdraw" | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [transactionHash, setTransactionHash] = useState<Hash | null>(null);
+	const [transactionFlow, setTransactionFlow] = useState<TransactionFlow | null>(null);
 
 	const totalAssets = useReadContract({
 		address: MOLQ_VAULT,
@@ -125,6 +144,22 @@ export function useMolqVault() {
 		[publicClient],
 	);
 
+	const updateStep = useCallback(
+		(id: TransactionStep["id"], update: Partial<TransactionStep>) => {
+			setTransactionFlow((current) =>
+				current
+					? {
+							...current,
+							steps: current.steps.map((step) =>
+								step.id === id ? { ...step, ...update } : step,
+							),
+						}
+					: current,
+			);
+		},
+		[],
+	);
+
 	const deposit = useCallback(
 		async (value: string) => {
 			if (!account.address) {
@@ -148,12 +183,46 @@ export function useMolqVault() {
 				return;
 			}
 
+			const needsApproval = (allowance.data ?? 0n) < assets;
+			setTransactionFlow({
+				action: "deposit",
+				amount: value,
+				open: true,
+				complete: false,
+				steps: [
+					{
+						id: "network",
+						label: "Mantle network",
+						description: "Confirm your wallet is connected to Mantle mainnet.",
+						status: "active",
+					},
+					...(needsApproval
+						? [
+								{
+									id: "approval" as const,
+									label: "Approve USDe",
+									description:
+										"Allow the verified MolQ vault to use this amount.",
+									status: "pending" as const,
+								},
+							]
+						: []),
+					{
+						id: "deposit",
+						label: "Deposit into MolQ",
+						description: "Sign the vault deposit and mint mqUSDe shares.",
+						status: "pending",
+					},
+				],
+			});
 			setPendingAction("deposit");
 			setError(null);
 			setTransactionHash(null);
 			try {
 				await ensureMantle();
-				if ((allowance.data ?? 0n) < assets) {
+				updateStep("network", { status: "complete" });
+				if (needsApproval) {
+					updateStep("approval", { status: "active" });
 					const approvalHash = await writeContractAsync({
 						address: USDE,
 						abi: erc20Abi,
@@ -162,9 +231,12 @@ export function useMolqVault() {
 						chainId: mantle.id,
 					});
 					setTransactionHash(approvalHash);
+					updateStep("approval", { hash: approvalHash });
 					await waitForReceipt(approvalHash);
+					updateStep("approval", { status: "complete" });
 				}
 
+				updateStep("deposit", { status: "active" });
 				const depositHash = await writeContractAsync({
 					address: MOLQ_VAULT,
 					abi: molqVaultAbi,
@@ -173,10 +245,25 @@ export function useMolqVault() {
 					chainId: mantle.id,
 				});
 				setTransactionHash(depositHash);
+				updateStep("deposit", { hash: depositHash });
 				await waitForReceipt(depositHash);
+				updateStep("deposit", { status: "complete" });
 				await refresh();
+				setTransactionFlow((current) =>
+					current ? { ...current, complete: true } : current,
+				);
 			} catch (caught) {
 				setError(normalizeWalletError(caught));
+				setTransactionFlow((current) =>
+					current
+						? {
+								...current,
+								steps: current.steps.map((step) =>
+									step.status === "active" ? { ...step, status: "error" } : step,
+								),
+							}
+						: current,
+				);
 			} finally {
 				setPendingAction(null);
 			}
@@ -190,6 +277,7 @@ export function useMolqVault() {
 			waitForReceipt,
 			walletBalance.data,
 			writeContractAsync,
+			updateStep,
 		],
 	);
 
@@ -199,11 +287,33 @@ export function useMolqVault() {
 			return;
 		}
 
+		setTransactionFlow({
+			action: "withdraw",
+			amount: formatUnits(userAssets.data ?? 0n, USDE_DECIMALS),
+			open: true,
+			complete: false,
+			steps: [
+				{
+					id: "network",
+					label: "Mantle network",
+					description: "Confirm your wallet is connected to Mantle mainnet.",
+					status: "active",
+				},
+				{
+					id: "redeem",
+					label: "Redeem mqUSDe",
+					description: "Sign the redemption and return USDe to your wallet.",
+					status: "pending",
+				},
+			],
+		});
 		setPendingAction("withdraw");
 		setError(null);
 		setTransactionHash(null);
 		try {
 			await ensureMantle();
+			updateStep("network", { status: "complete" });
+			updateStep("redeem", { status: "active" });
 			const hash = await writeContractAsync({
 				address: MOLQ_VAULT,
 				abi: molqVaultAbi,
@@ -212,10 +322,23 @@ export function useMolqVault() {
 				chainId: mantle.id,
 			});
 			setTransactionHash(hash);
+			updateStep("redeem", { hash });
 			await waitForReceipt(hash);
+			updateStep("redeem", { status: "complete" });
 			await refresh();
+			setTransactionFlow((current) => (current ? { ...current, complete: true } : current));
 		} catch (caught) {
 			setError(normalizeWalletError(caught));
+			setTransactionFlow((current) =>
+				current
+					? {
+							...current,
+							steps: current.steps.map((step) =>
+								step.status === "active" ? { ...step, status: "error" } : step,
+							),
+						}
+					: current,
+			);
 		} finally {
 			setPendingAction(null);
 		}
@@ -224,9 +347,16 @@ export function useMolqVault() {
 		ensureMantle,
 		refresh,
 		shareBalance.data,
+		userAssets.data,
+		updateStep,
 		waitForReceipt,
 		writeContractAsync,
 	]);
+
+	const closeTransactionFlow = useCallback(() => {
+		if (pendingAction) return;
+		setTransactionFlow(null);
+	}, [pendingAction]);
 
 	return useMemo(
 		() => ({
@@ -237,6 +367,7 @@ export function useMolqVault() {
 			pendingAction,
 			error,
 			transactionHash,
+			transactionFlow,
 			totalAssets: totalAssets.data ?? 0n,
 			shieldAssets: shieldAssets.data ?? 0n,
 			liquidAssets: liquidAssets.data ?? 0n,
@@ -249,6 +380,7 @@ export function useMolqVault() {
 			deposit,
 			withdrawAll,
 			refresh,
+			closeTransactionFlow,
 			formatUsde: (value: bigint) => formatUnits(value, USDE_DECIMALS),
 		}),
 		[
@@ -269,9 +401,11 @@ export function useMolqVault() {
 			shieldAssets.data,
 			totalAssets.data,
 			transactionHash,
+			transactionFlow,
 			userAssets.data,
 			walletBalance.data,
 			withdrawAll,
+			closeTransactionFlow,
 		],
 	);
 }

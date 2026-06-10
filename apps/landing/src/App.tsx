@@ -860,12 +860,10 @@ function DataBadge({
 function IntegrationLogo({ src, name }: { src: string; name: string }) {
 	return (
 		<div className="flex h-8 items-center gap-2.5">
-			<img
-				src={src}
-				alt=""
-				className="h-6 w-7 object-contain brightness-0 invert opacity-55"
-			/>
-			<span className="text-sm font-bold text-white/55">{name}</span>
+			<span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden">
+				<img src={src} alt={`${name} logo`} className="h-7 w-7 object-contain" />
+			</span>
+			<span className="text-sm font-bold text-white/65">{name}</span>
 		</div>
 	);
 }

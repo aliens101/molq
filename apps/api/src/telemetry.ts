@@ -7,6 +7,7 @@ import type {
 	VaultHistoryEvent,
 	VaultHistorySnapshot,
 } from "@molq/shared";
+import { formatUnits } from "viem";
 
 export class TelemetryStore {
 	private lastRecordedAt = 0;
@@ -54,6 +55,16 @@ export class TelemetryStore {
 		return { performance, ...indexed };
 	}
 
+	async realizedProfitUsd(): Promise<number> {
+		const { vaultEvents } = await this.readIndexerHistory();
+		return vaultEvents
+			.filter((event) => event.type === "profit_hardened" && event.alphaBalance)
+			.reduce(
+				(total, event) => total + Number(formatUnits(BigInt(event.alphaBalance!), 18)),
+				0,
+			);
+	}
+
 	private async readPoints(): Promise<PerformancePoint[]> {
 		try {
 			const content = await readFile(this.path, "utf8");
@@ -79,7 +90,7 @@ export class TelemetryStore {
 				body: JSON.stringify({
 					query: `query MolqHistory {
 						vaultEvents(orderBy: "blockTimestamp", orderDirection: "desc", limit: 100) {
-							items { id type assets shares amount blockTimestamp transactionHash }
+							items { id type assets shares amount alphaBalance blockTimestamp transactionHash }
 						}
 						vaultSnapshots(orderBy: "blockTimestamp", orderDirection: "desc", limit: 100) {
 							items { id trigger totalAssets shieldBalance alphaBalance blockTimestamp transactionHash }

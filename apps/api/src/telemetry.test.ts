@@ -22,7 +22,16 @@ describe("TelemetryStore", () => {
 				ok: true,
 				json: async () => ({
 					data: {
-						vaultEvents: { items: [{ id: "event-1", type: "deposit" }] },
+						vaultEvents: {
+							items: [
+								{ id: "event-1", type: "deposit" },
+								{
+									id: "event-2",
+									type: "profit_hardened",
+									alphaBalance: "9000000000000000",
+								},
+							],
+						},
 						vaultSnapshots: { items: [{ id: "snapshot-1", trigger: "deposit" }] },
 					},
 				}),
@@ -38,6 +47,7 @@ describe("TelemetryStore", () => {
 		expect(history.vaultEvents[0]?.type).toBe("deposit");
 		expect(history.vaultSnapshots[0]?.trigger).toBe("deposit");
 		expect(history.indexerAvailable).toBe(true);
+		expect(await store.realizedProfitUsd()).toBe(0.009);
 	});
 });
 

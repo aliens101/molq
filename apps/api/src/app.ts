@@ -51,7 +51,11 @@ export function createMolqServer(
 			}
 
 			if (request.method === "GET" && path === "/api/dashboard") {
-				const dashboard = await withExecution(hedgeExecutor);
+				const [dashboard, realizedProfit] = await Promise.all([
+					withExecution(hedgeExecutor),
+					telemetry.realizedProfitUsd(),
+				]);
+				dashboard.portfolio.realizedProfit = realizedProfit;
 				void telemetry.record(dashboard).catch((error) => {
 					console.error("Failed to persist performance telemetry:", error);
 				});

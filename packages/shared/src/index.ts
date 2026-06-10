@@ -170,6 +170,7 @@ export interface VaultHistoryEvent {
 	assets?: string | null;
 	shares?: string | null;
 	amount?: string | null;
+	alphaBalance?: string | null;
 	blockTimestamp: string;
 	transactionHash: `0x${string}`;
 }

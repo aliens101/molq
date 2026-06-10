@@ -14,6 +14,8 @@ export default createConfig({
 		mantle: {
 			id: 5000,
 			rpc: process.env.PONDER_RPC_URL_5000 ?? "https://rpc.mantle.xyz",
+			maxRequestsPerSecond: Number(process.env.PONDER_MAX_REQUESTS_PER_SECOND ?? 2),
+			ethGetLogsBlockRange: Number(process.env.PONDER_LOG_BLOCK_RANGE ?? 100),
 		},
 	},
 	contracts: {

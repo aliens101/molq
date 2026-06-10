@@ -3,7 +3,8 @@ import { IdentityRegistryAbi } from "./abis/IdentityRegistryAbi";
 import { MolqDecisionLoggerAbi } from "./abis/MolqDecisionLoggerAbi";
 import { MolqVaultAbi } from "./abis/MolqVaultAbi";
 
-const decisionLogger = "0x24df9c33D24D7C84e527D247D25a203490001Be9";
+const legacyDecisionLogger = "0x24df9c33D24D7C84e527D247D25a203490001Be9";
+const decisionLogger = "0x0F38FF858fE3974be7c05625281CA6b774Be9E9b";
 const vault = "0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9";
 const startBlock = Number(process.env.PONDER_START_BLOCK ?? 96423301);
 const identityRegistry = "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432";
@@ -19,11 +20,18 @@ export default createConfig({
 		},
 	},
 	contracts: {
+		LegacyMolqDecisionLogger: {
+			chain: "mantle",
+			abi: MolqDecisionLoggerAbi,
+			address: (process.env.PONDER_MOLQ_LEGACY_DECISION_LOGGER ??
+				legacyDecisionLogger) as `0x${string}`,
+			startBlock,
+		},
 		MolqDecisionLogger: {
 			chain: "mantle",
 			abi: MolqDecisionLoggerAbi,
 			address: (process.env.PONDER_MOLQ_DECISION_LOGGER ?? decisionLogger) as `0x${string}`,
-			startBlock,
+			startBlock: Number(process.env.PONDER_DECISION_LOGGER_V2_START_BLOCK ?? 96477427),
 		},
 		MolqVault: {
 			chain: "mantle",

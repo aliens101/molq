@@ -8,14 +8,22 @@
 			"registry": "0x8004A169FB4a3325136EB29fA0ceB6D2e539a432",
 			"agentId": 112,
 			"registrationTransactionHash": "0x8326b8f582e2a5a78e5f309a22e58b232651f578836741eb011e85f2345a554f",
-			"uriTransactionHash": "0xb77149a9779870295ed2e4b44b808d18eaafce9574a6a5be0c102f119ff81b03",
+			"uriTransactionHash": "0x75515ba614d48731c042462511f688266b0fe97caf956521551cac33553b83a3",
 			"blockNumber": 96423301,
 			"explorerUrl": "https://mantlescan.xyz/token/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432?a=112"
 		},
 		"decisionLogger": {
+			"address": "0x0F38FF858fE3974be7c05625281CA6b774Be9E9b",
+			"transactionHash": "0x93fa69281326b10f035e7d8e4f643d1798a5d33d5d5b33efe14d6854134934c5",
+			"blockNumber": 96477427,
+			"owner": "0xFd735C02Afe8D539dFCde0D2fC7Aa4510306354C",
+			"authorizedAgent": "0x3B4f0135465d444a5bD06Ab90fC59B73916C85F5",
+			"verified": true,
+			"explorerUrl": "https://mantlescan.xyz/address/0x0F38FF858fE3974be7c05625281CA6b774Be9E9b#code"
+		},
+		"legacyDecisionLogger": {
 			"address": "0x24df9c33D24D7C84e527D247D25a203490001Be9",
 			"transactionHash": "0x057f1448b98581dfe0abc8b4604a3e72074601151f9f8eb52fed3dabf71c1151",
-			"authorizationTransactionHash": "0x9017f2becf79c0912efc1e76b4544948e8341bbbb27790916a8fc7ad3a9c9857",
 			"blockNumber": 96435308,
 			"verified": true,
 			"explorerUrl": "https://mantlescan.xyz/address/0x24df9c33D24D7C84e527D247D25a203490001Be9#code"
@@ -32,6 +40,12 @@
 			"blockNumber": 96435226,
 			"verified": true,
 			"performanceFeeBps": 1000,
+			"owner": "0xFd735C02Afe8D539dFCde0D2fC7Aa4510306354C",
+			"treasury": "0xFd735C02Afe8D539dFCde0D2fC7Aa4510306354C",
+			"keeper": "0x3B4f0135465d444a5bD06Ab90fC59B73916C85F5",
+			"treasuryMigrationTransactionHash": "0x279013ae8d63b9efcb713abd9a21037ec9a64ad074ccab6d30a7270595b73fc4",
+			"ownershipTransferTransactionHash": "0x1e862c1ce847b715fa070fdafc0fe19479af03946e08701e11505d7e4be367ef",
+			"ownershipAcceptanceTransactionHash": "0x636beeed9faf3c398306f5a835e5d60d922c4cdd65ff455c635f67b072cf5a1a",
 			"explorerUrl": "https://mantlescan.xyz/address/0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9#code"
 		},
 		"initUsdeShieldReader": {

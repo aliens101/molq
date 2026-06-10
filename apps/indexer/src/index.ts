@@ -47,6 +47,57 @@ ponder.on("IdentityRegistry:URIUpdated", async ({ event, context }) => {
 		}));
 });
 
+ponder.on("LegacyMolqDecisionLogger:AgentSet", async ({ event, context }) => {
+	await context.db
+		.insert(agent)
+		.values({
+			address: event.args.agent,
+			allowed: event.args.allowed,
+			decisionCount: 0n,
+			totalAmount: 0n,
+			lastDecisionId: null,
+			updatedAt: event.block.timestamp,
+		})
+		.onConflictDoUpdate((row) => ({
+			...row,
+			allowed: event.args.allowed,
+			updatedAt: event.block.timestamp,
+		}));
+});
+
+ponder.on("LegacyMolqDecisionLogger:DecisionLogged", async ({ event, context }) => {
+	await context.db.insert(decision).values({
+		id: eventKey(event),
+		decisionId: event.args.id,
+		agent: event.args.agent,
+		actionType: event.args.actionType,
+		amount: event.args.amount,
+		riskScoreBps: event.args.riskScoreBps,
+		reasonHash: event.args.reasonHash,
+		blockNumber: event.block.number,
+		blockTimestamp: event.block.timestamp,
+		transactionHash: event.transaction.hash,
+		logIndex: event.log.logIndex,
+	});
+
+	await context.db
+		.insert(agent)
+		.values({
+			address: event.args.agent,
+			allowed: true,
+			decisionCount: 1n,
+			totalAmount: event.args.amount,
+			lastDecisionId: event.args.id,
+			updatedAt: event.block.timestamp,
+		})
+		.onConflictDoUpdate((row) => ({
+			decisionCount: row.decisionCount + 1n,
+			totalAmount: row.totalAmount + event.args.amount,
+			lastDecisionId: event.args.id,
+			updatedAt: event.block.timestamp,
+		}));
+});
+
 ponder.on("MolqDecisionLogger:AgentSet", async ({ event, context }) => {
 	await context.db
 		.insert(agent)

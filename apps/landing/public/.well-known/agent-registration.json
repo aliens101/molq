@@ -11,8 +11,8 @@
 		},
 		{
 			"name": "decision-log",
-			"endpoint": "eip155:5000:0x24df9c33D24D7C84e527D247D25a203490001Be9",
-			"version": "1"
+			"endpoint": "eip155:5000:0x0F38FF858fE3974be7c05625281CA6b774Be9E9b",
+			"version": "2"
 		}
 	],
 	"x402Support": false,

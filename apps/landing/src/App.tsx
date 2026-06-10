@@ -31,7 +31,7 @@ const APP_URL =
 const GITHUB_URL = "https://github.com/aliens101/molq";
 const DOCS_URL = "https://docs.molq.site";
 const VAULT_URL = "https://mantlescan.xyz/address/0xBcBe5DE4D9F8F9336924eCB90888a775DfB06Eb9#code";
-const LOGGER_URL = "https://mantlescan.xyz/address/0x24df9c33D24D7C84e527D247D25a203490001Be9#code";
+const LOGGER_URL = "https://mantlescan.xyz/address/0x0F38FF858fE3974be7c05625281CA6b774Be9E9b#code";
 const AGENT_URL = "https://mantlescan.xyz/token/0x8004A169FB4a3325136EB29fA0ceB6D2e539a432?a=112";
 
 interface Dashboard {

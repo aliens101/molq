@@ -53,6 +53,12 @@ sudo ln -sfn "$RELEASE_DIR/landing" "$WEB_ROOT/landing"
 sudo ln -sfn "$RELEASE_DIR/app" "$WEB_ROOT/app"
 
 log "Reloading PM2 services"
+printf '%s\n' \
+	'fs.inotify.max_user_watches=524288' \
+	'fs.inotify.max_user_instances=1024' |
+	sudo tee /etc/sysctl.d/99-molq.conf >/dev/null
+sudo sysctl -w fs.inotify.max_user_watches=524288 >/dev/null
+sudo sysctl -w fs.inotify.max_user_instances=1024 >/dev/null
 pm2 startOrReload "$REPO_DIR/deploy/ecosystem.config.cjs" --update-env
 pm2 save
 
@@ -69,8 +75,10 @@ fi
 
 log "Checking local services"
 curl --fail --silent --show-error --retry 10 --retry-delay 2 \
+	--retry-connrefused \
 	"http://127.0.0.1:8070/api/health" >/dev/null
 curl --fail --silent --show-error --retry 15 --retry-delay 2 \
+	--retry-connrefused \
 	"http://127.0.0.1:8071/health" >/dev/null
 
 log "Deployment complete: $RELEASE_ID"

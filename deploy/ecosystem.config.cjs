@@ -3,8 +3,9 @@ module.exports = {
 		{
 			name: "molq-api",
 			cwd: "/home/cuyvps/apps/molq/apps/api",
-			script: "dist/server.js",
-			interpreter: "node",
+			script: "./node_modules/.bin/tsx",
+			args: "src/server.ts",
+			interpreter: "none",
 			env: {
 				NODE_ENV: "production",
 				HOST: "127.0.0.1",

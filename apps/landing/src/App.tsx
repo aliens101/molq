@@ -1,3 +1,6 @@
+import { useGSAP } from "@gsap/react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
 	ArrowRight,
 	Bot,
@@ -11,7 +14,9 @@ import {
 	ShieldCheck,
 	X,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
+
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const APP_URL = import.meta.env.VITE_APP_URL ?? "http://localhost:5173";
 const GITHUB_URL = "https://github.com/aliens101/molq";
@@ -54,10 +59,194 @@ const architecture = [
 
 export default function App() {
 	const [menuOpen, setMenuOpen] = useState(false);
+	const pageRef = useRef<HTMLDivElement>(null);
+	const economicsValueRef = useRef<HTMLDivElement>(null);
+
+	useGSAP(
+		() => {
+			if (navigator.userAgent.includes("jsdom")) return;
+
+			const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+			if (reducedMotion) {
+				gsap.set(".gsap-reveal", { autoAlpha: 1, y: 0, x: 0, scale: 1 });
+				return;
+			}
+
+			const intro = gsap.timeline({ defaults: { ease: "power3.out" } });
+			intro
+				.from(".site-header", { yPercent: -100, duration: 0.55 }, 0)
+				.from(".hero-eyebrow", { autoAlpha: 0, x: -24, duration: 0.45 }, 0.22)
+				.from(
+					".hero-title-char",
+					{
+						autoAlpha: 0,
+						yPercent: 115,
+						rotationX: -70,
+						transformOrigin: "50% 100%",
+						stagger: 0.055,
+						duration: 0.68,
+					},
+					0.38,
+				)
+				.from(".hero-description", { autoAlpha: 0, y: 24, duration: 0.52 }, 0.72)
+				.from(".hero-action", { autoAlpha: 0, y: 18, stagger: 0.1, duration: 0.45 }, 0.95)
+				.from(
+					".agent-terminal",
+					{ autoAlpha: 0, x: 48, rotationY: -5, duration: 0.72 },
+					0.42,
+				)
+				.from(
+					".terminal-entry",
+					{ autoAlpha: 0, x: 12, stagger: 0.08, duration: 0.35 },
+					0.9,
+				)
+				.from(".proof-stat", { autoAlpha: 0, y: 18, stagger: 0.08, duration: 0.4 }, 1.18);
+
+			gsap.to(".hero-grid-motion", {
+				backgroundPosition: "center 160px",
+				ease: "none",
+				scrollTrigger: {
+					trigger: ".hero-grid-motion",
+					start: "top top",
+					end: "bottom top",
+					scrub: 1,
+				},
+			});
+
+			gsap.to(".agent-terminal", {
+				y: 54,
+				rotationX: 2,
+				ease: "none",
+				scrollTrigger: {
+					trigger: ".hero-grid-motion",
+					start: "top top",
+					end: "bottom top",
+					scrub: 1,
+				},
+			});
+
+			gsap.utils.toArray<HTMLElement>(".section-heading").forEach((heading) => {
+				gsap.from(heading.children, {
+					autoAlpha: 0,
+					y: 38,
+					stagger: 0.1,
+					duration: 0.75,
+					ease: "power3.out",
+					scrollTrigger: {
+						trigger: heading,
+						start: "top 82%",
+						once: true,
+					},
+				});
+			});
+
+			ScrollTrigger.batch(".strategy-card", {
+				start: "top 84%",
+				once: true,
+				onEnter: (cards) =>
+					gsap.fromTo(
+						cards,
+						{ autoAlpha: 0, y: 56, scale: 0.96 },
+						{
+							autoAlpha: 1,
+							y: 0,
+							scale: 1,
+							stagger: 0.12,
+							duration: 0.7,
+							ease: "power3.out",
+							overwrite: true,
+						},
+					),
+			});
+
+			gsap.from(".proof-row", {
+				autoAlpha: 0,
+				x: 48,
+				stagger: 0.1,
+				duration: 0.65,
+				ease: "power3.out",
+				scrollTrigger: {
+					trigger: ".proof-list",
+					start: "top 76%",
+					once: true,
+				},
+			});
+
+			const counter = { value: 0 };
+			gsap.to(counter, {
+				value: 10,
+				duration: 1.4,
+				ease: "power2.out",
+				snap: { value: 1 },
+				onUpdate: () => {
+					if (economicsValueRef.current) {
+						economicsValueRef.current.textContent = `${counter.value}%`;
+					}
+				},
+				scrollTrigger: {
+					trigger: ".economics-panel",
+					start: "top 72%",
+					once: true,
+				},
+			});
+
+			gsap.from(".economics-copy > *", {
+				autoAlpha: 0,
+				y: 32,
+				stagger: 0.1,
+				duration: 0.7,
+				ease: "power3.out",
+				scrollTrigger: {
+					trigger: ".economics-copy",
+					start: "top 78%",
+					once: true,
+				},
+			});
+
+			gsap.from(".final-cta > *", {
+				autoAlpha: 0,
+				y: 42,
+				scale: 0.96,
+				stagger: 0.12,
+				duration: 0.75,
+				ease: "power3.out",
+				scrollTrigger: {
+					trigger: ".final-cta",
+					start: "top 78%",
+					once: true,
+				},
+			});
+
+			if (window.matchMedia("(pointer: fine)").matches) {
+				const pointerCleanups: Array<() => void> = [];
+				document.querySelectorAll<HTMLElement>(".magnetic").forEach((button) => {
+					const xTo = gsap.quickTo(button, "x", { duration: 0.35, ease: "power3" });
+					const yTo = gsap.quickTo(button, "y", { duration: 0.35, ease: "power3" });
+					const onMove = (event: PointerEvent) => {
+						const rect = button.getBoundingClientRect();
+						xTo((event.clientX - rect.left - rect.width / 2) * 0.16);
+						yTo((event.clientY - rect.top - rect.height / 2) * 0.2);
+					};
+					const onLeave = () => {
+						xTo(0);
+						yTo(0);
+					};
+					button.addEventListener("pointermove", onMove);
+					button.addEventListener("pointerleave", onLeave);
+					pointerCleanups.push(() => {
+						button.removeEventListener("pointermove", onMove);
+						button.removeEventListener("pointerleave", onLeave);
+					});
+				});
+				return () => pointerCleanups.forEach((cleanup) => cleanup());
+			}
+		},
+		{ scope: pageRef },
+	);
 
 	return (
-		<div className="min-h-screen overflow-x-hidden bg-ink text-white">
-			<header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-ink/90 backdrop-blur-xl">
+		<div ref={pageRef} className="min-h-screen overflow-x-hidden bg-ink text-white">
+			<header className="site-header fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-ink/90 backdrop-blur-xl">
 				<div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-5 lg:px-10">
 					<a href="#" className="flex items-center gap-3" aria-label="MolQ home">
 						<span className="grid h-9 w-9 place-items-center bg-signal font-display text-sm font-bold text-ink">
@@ -83,13 +272,13 @@ export default function App() {
 							href={GITHUB_URL}
 							target="_blank"
 							rel="noreferrer"
-							className="icon-button"
+							className="icon-button magnetic"
 							aria-label="Open GitHub repository"
 							title="GitHub"
 						>
 							<Github className="h-4 w-4" />
 						</a>
-						<a href={APP_URL} className="primary-button">
+						<a href={APP_URL} className="primary-button magnetic">
 							Launch app
 							<ArrowRight className="h-4 w-4" />
 						</a>
@@ -126,18 +315,29 @@ export default function App() {
 			</header>
 
 			<main>
-				<section className="hero-grid relative border-b border-white/10 pt-16 lg:min-h-[92vh]">
+				<section className="hero-grid hero-grid-motion relative border-b border-white/10 pt-16 lg:min-h-[92vh]">
 					<div className="mx-auto flex w-full min-w-0 max-w-[1440px] flex-col justify-between overflow-hidden px-5 pb-8 pt-12 lg:min-h-[calc(92vh-4rem)] lg:px-10 lg:pt-20">
 						<div className="grid w-full min-w-0 grid-cols-1 items-end gap-12 lg:grid-cols-[1.18fr_0.82fr]">
 							<div className="hero-copy w-full min-w-0 max-w-full">
-								<div className="eyebrow">
+								<div className="eyebrow hero-eyebrow">
 									<span className="h-2 w-2 bg-signal" />
 									Autonomous USDe yield on Mantle
 								</div>
-								<h1 className="mt-7 max-w-5xl text-[clamp(3.6rem,8vw,8.8rem)] font-bold leading-[0.84]">
-									MolQ
+								<h1
+									className="mt-7 flex max-w-5xl overflow-hidden text-[clamp(3.6rem,8vw,8.8rem)] font-bold leading-[0.84]"
+									aria-label="MolQ"
+								>
+									{"MolQ".split("").map((character, index) => (
+										<span
+											key={`${character}-${index}`}
+											aria-hidden="true"
+											className="hero-title-char inline-block"
+										>
+											{character}
+										</span>
+									))}
 								</h1>
-								<p className="mt-7 w-full max-w-2xl break-words text-xl leading-8 text-white/64 sm:text-2xl">
+								<p className="hero-description mt-7 w-full max-w-2xl break-words text-xl leading-8 text-white/64 sm:text-2xl">
 									An identifiable AI agent that searches for positive carry,
 									protects capital with hard policy limits, and proves every
 									decision on-chain.
@@ -145,7 +345,7 @@ export default function App() {
 								<div className="mt-9 flex flex-col gap-3 sm:flex-row">
 									<a
 										href={APP_URL}
-										className="primary-button justify-center sm:justify-start"
+										className="primary-button magnetic hero-action justify-center sm:justify-start"
 									>
 										Launch MolQ
 										<ArrowRight className="h-4 w-4" />
@@ -154,7 +354,7 @@ export default function App() {
 										href={AGENT_URL}
 										target="_blank"
 										rel="noreferrer"
-										className="secondary-button justify-center sm:justify-start"
+										className="secondary-button magnetic hero-action justify-center sm:justify-start"
 									>
 										Verify agent
 										<ExternalLink className="h-4 w-4" />
@@ -169,7 +369,7 @@ export default function App() {
 							{proof.map((item) => (
 								<div
 									key={item.label}
-									className="border-b border-white/10 px-5 py-5 last:border-b-0 sm:border-r lg:border-b-0"
+									className="proof-stat border-b border-white/10 px-5 py-5 last:border-b-0 sm:border-r lg:border-b-0"
 								>
 									<div className="text-xs uppercase text-white/35">
 										{item.label}
@@ -193,7 +393,7 @@ export default function App() {
 							{architecture.map(({ step, title, copy, icon: Icon }) => (
 								<article
 									key={step}
-									className="group min-h-[280px] border-b border-r border-white/10 p-6 transition-colors hover:bg-white/[0.035]"
+									className="strategy-card group min-h-[280px] border-b border-r border-white/10 p-6 transition-colors hover:bg-white/[0.035]"
 								>
 									<div className="flex items-center justify-between">
 										<span className="font-mono text-xs text-white/30">
@@ -219,7 +419,7 @@ export default function App() {
 								dark
 							/>
 
-							<div className="border-t border-ink/20">
+							<div className="proof-list border-t border-ink/20">
 								<ProofRow
 									title="ERC-8004 identity"
 									value="Agent #112"
@@ -245,22 +445,28 @@ export default function App() {
 					</div>
 				</section>
 
-				<section id="economics" className="border-b border-white/10 py-24 lg:py-32">
+				<section
+					id="economics"
+					className="economics-panel border-b border-white/10 py-24 lg:py-32"
+				>
 					<div className="mx-auto grid max-w-[1440px] gap-16 px-5 lg:grid-cols-2 lg:px-10">
 						<div>
 							<div className="eyebrow">
 								<span className="h-2 w-2 bg-signal" />
 								Aligned economics
 							</div>
-							<div className="mt-10 text-[clamp(5rem,12vw,10rem)] font-bold leading-none text-signal">
-								10%
+							<div
+								ref={economicsValueRef}
+								className="mt-10 text-[clamp(5rem,12vw,10rem)] font-bold leading-none text-signal"
+							>
+								0%
 							</div>
 							<div className="mt-3 text-xl text-white/55">
 								of realized Alpha profit
 							</div>
 						</div>
 
-						<div className="self-end">
+						<div className="economics-copy self-end">
 							<h2 className="max-w-xl text-4xl font-bold leading-tight sm:text-5xl">
 								MolQ earns only after users earn.
 							</h2>
@@ -275,12 +481,12 @@ export default function App() {
 				</section>
 
 				<section className="py-24 lg:py-32">
-					<div className="mx-auto max-w-[1440px] px-5 text-center lg:px-10">
+					<div className="final-cta mx-auto max-w-[1440px] px-5 text-center lg:px-10">
 						<Bot className="mx-auto h-10 w-10 text-signal" />
 						<h2 className="mx-auto mt-8 max-w-4xl text-5xl font-bold leading-[0.98] sm:text-7xl">
 							Put idle USDe under accountable intelligence.
 						</h2>
-						<a href={APP_URL} className="primary-button mt-10 inline-flex">
+						<a href={APP_URL} className="primary-button magnetic mt-10 inline-flex">
 							Launch MolQ
 							<ArrowRight className="h-4 w-4" />
 						</a>
@@ -317,7 +523,8 @@ export default function App() {
 
 function AgentTerminal() {
 	return (
-		<div className="terminal relative w-full min-w-0 overflow-hidden border border-white/15 bg-[#0a0d0a]">
+		<div className="terminal agent-terminal relative w-full min-w-0 overflow-hidden border border-white/15 bg-[#0a0d0a]">
+			<div className="terminal-scanline" aria-hidden="true" />
 			<div className="flex h-11 items-center justify-between border-b border-white/10 px-4">
 				<div className="flex items-center gap-2 text-xs text-white/45">
 					<span className="h-2 w-2 animate-pulse bg-signal" />
@@ -326,19 +533,19 @@ function AgentTerminal() {
 				<span className="font-mono text-[10px] text-white/25">MANTLE 5000</span>
 			</div>
 			<div className="p-5 font-mono text-xs sm:p-6">
-				<div className="hidden sm:block">
+				<div className="terminal-entry hidden sm:block">
 					<TerminalLine label="identity" value="erc8004:112" />
 					<TerminalLine label="model" value="gpt-5.4-mini" />
 					<TerminalLine label="shield" value="Aave V3 / USDe / 85%" />
 					<TerminalLine label="alpha" value="Bybit / ETHUSDT / capped" />
 					<div className="my-5 h-px bg-white/10" />
 				</div>
-				<div className="text-white/35">latest_decision</div>
-				<div className="mt-3 text-lg text-signal">HOLD</div>
-				<p className="mt-3 w-full max-w-md break-words font-sans text-sm leading-6 text-white/55">
+				<div className="terminal-entry text-white/35">latest_decision</div>
+				<div className="terminal-entry mt-3 text-lg text-signal">HOLD</div>
+				<p className="terminal-entry mt-3 w-full max-w-md break-words font-sans text-sm leading-6 text-white/55">
 					No assets to protect or hedge. Avoid unnecessary turnover.
 				</p>
-				<div className="mt-6 flex items-center gap-2 text-white/45">
+				<div className="terminal-entry mt-6 flex items-center gap-2 text-white/45">
 					<Check className="h-3.5 w-3.5 text-signal" />
 					<span>logged on Mantle</span>
 				</div>
@@ -368,7 +575,7 @@ function SectionHeading({
 	dark?: boolean;
 }) {
 	return (
-		<div className="max-w-3xl">
+		<div className="section-heading max-w-3xl">
 			<div className={`font-mono text-xs ${dark ? "text-ink/35" : "text-signal"}`}>
 				/{number}
 			</div>
@@ -390,7 +597,7 @@ function ProofRow({ title, value, href }: { title: string; value: string; href: 
 			href={href}
 			target="_blank"
 			rel="noreferrer"
-			className="group flex items-center justify-between gap-4 border-b border-ink/20 py-6"
+			className="proof-row group flex items-center justify-between gap-4 border-b border-ink/20 py-6"
 		>
 			<div>
 				<div className="text-xs uppercase text-ink/40">{title}</div>

@@ -21,6 +21,7 @@ import { BrowserRouter, NavLink, Navigate, Route, Routes } from "react-router-do
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ExecutionTable } from "@/features/vault/ExecutionTable";
+import { TransactionStepperDialog } from "@/features/vault/TransactionStepperDialog";
 import { VaultSummary } from "@/features/vault/VaultSummary";
 import { Sidebar } from "@/layouts/sidebar";
 import { getAgentStatus, getDashboard, type AgentStatusResponse } from "@/molq/api";
@@ -89,6 +90,12 @@ function MolqApp() {
 
 	return (
 		<div className="dark min-h-screen bg-background text-foreground">
+			<TransactionStepperDialog
+				flow={vault.transactionFlow ?? null}
+				busy={vault.pendingAction !== null}
+				error={vault.error}
+				onClose={vault.closeTransactionFlow}
+			/>
 			<div className="mx-auto flex min-h-screen max-w-[1680px]">
 				<Sidebar />
 

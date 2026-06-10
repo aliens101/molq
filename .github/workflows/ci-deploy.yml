@@ -35,6 +35,8 @@ jobs:
                   forge install OpenZeppelin/openzeppelin-contracts@v5.4.0 --no-git
 
             - run: pnpm install --frozen-lockfile
+            - name: Validate Mintlify documentation
+              run: pnpm docs:check
             - run: pnpm build
             - run: pnpm test
 

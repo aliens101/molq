@@ -1,6 +1,6 @@
 import type { AgentPolicySnapshot } from "@molq/shared";
 import { describe, expect, it, vi } from "vitest";
-import { AgentPolicy, type AgentModel } from "./policy.js";
+import { AgentPolicy, type AgentModel, OpenAIResponsesModel } from "./policy.js";
 
 const snapshot: AgentPolicySnapshot = {
 	totalAssetsUsd: 10_000,
@@ -84,6 +84,44 @@ describe("AgentPolicy", () => {
 		const decision = await new AgentPolicy(model, config).decide(snapshot);
 
 		expect(decision.source).toBe("deterministic");
-		expect(decision.safetyChecks[0]).toContain("deterministic policy");
+		expect(decision.safetyChecks[0]).toContain("timeout");
+	});
+
+	it("requests a strict structured proposal from OpenAI", async () => {
+		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					output: [
+						{
+							content: [
+								{
+									type: "output_text",
+									text: JSON.stringify({
+										action: "hold",
+										targetHedgeNotionalUsd: 0,
+										confidence: 0.9,
+										riskScore: 25,
+										reason: "Funding is negative.",
+									}),
+								},
+							],
+						},
+					],
+				}),
+				{ status: 200, headers: { "Content-Type": "application/json" } },
+			),
+		);
+
+		const model = new OpenAIResponsesModel("test-key", "test-model", "https://example.com/v1");
+		const proposal = await model.propose(snapshot);
+		const request = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)) as {
+			store: boolean;
+			text: { format: { type: string; strict: boolean } };
+		};
+
+		expect(proposal.action).toBe("hold");
+		expect(request.store).toBe(false);
+		expect(request.text.format).toMatchObject({ type: "json_schema", strict: true });
+		fetchMock.mockRestore();
 	});
 });

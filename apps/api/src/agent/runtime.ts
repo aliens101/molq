@@ -60,6 +60,9 @@ export class AgentRuntime {
 
 	start(): NodeJS.Timeout | undefined {
 		if (!this.enabled || this.intervalMs <= 0) return undefined;
+		void this.run().catch((error) => {
+			console.error("MolQ initial agent cycle failed:", error);
+		});
 		const timer = setInterval(() => {
 			void this.run().catch((error) => {
 				console.error("MolQ agent cycle failed:", error);

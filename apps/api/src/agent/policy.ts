@@ -61,8 +61,10 @@ export class AgentPolicy {
 			try {
 				proposal = proposalSchema.parse(await this.model.propose(snapshot));
 				source = "model";
-			} catch {
-				safetyChecks.push("Model unavailable or invalid; deterministic policy used.");
+			} catch (error) {
+				safetyChecks.push(
+					`Model fallback: ${error instanceof Error ? error.message : "invalid response"}. Deterministic policy used.`,
+				);
 			}
 		}
 
@@ -104,14 +106,50 @@ export class OpenAIResponsesModel implements AgentModel {
 			},
 			body: JSON.stringify({
 				model: this.name,
+				store: false,
 				instructions:
-					"You are MolQ's portfolio strategist. Return only JSON. Preserve principal, prefer positive carry, and choose one action: hold, rebalance, hedge, or rebalance_and_hedge.",
-				input: `Evaluate this live portfolio snapshot: ${JSON.stringify(snapshot)}. Return {action,targetHedgeNotionalUsd,confidence,riskScore,reason}.`,
+					"You are MolQ's portfolio strategist. Preserve principal, prefer positive carry, and choose the least risky justified action.",
+				input: `Evaluate this live portfolio snapshot: ${JSON.stringify(snapshot)}`,
+				text: {
+					format: {
+						type: "json_schema",
+						name: "molq_agent_proposal",
+						strict: true,
+						schema: {
+							type: "object",
+							properties: {
+								action: {
+									type: "string",
+									enum: ["hold", "rebalance", "hedge", "rebalance_and_hedge"],
+								},
+								targetHedgeNotionalUsd: { type: "number", minimum: 0 },
+								confidence: { type: "number", minimum: 0, maximum: 1 },
+								riskScore: { type: "number", minimum: 0, maximum: 100 },
+								reason: { type: "string", minLength: 1, maxLength: 280 },
+							},
+							required: [
+								"action",
+								"targetHedgeNotionalUsd",
+								"confidence",
+								"riskScore",
+								"reason",
+							],
+							additionalProperties: false,
+						},
+					},
+				},
 			}),
 			signal: AbortSignal.timeout(20_000),
 		});
 		if (!response.ok) {
-			throw new Error(`OpenAI request failed with ${response.status}`);
+			const body = (await response.json().catch(() => null)) as {
+				error?: { message?: string };
+			} | null;
+			throw new Error(
+				body?.error?.message
+					? `OpenAI ${response.status}: ${body.error.message}`
+					: `OpenAI request failed with ${response.status}`,
+			);
 		}
 
 		const body = (await response.json()) as OpenAIResponse;

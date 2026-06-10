@@ -1,4 +1,4 @@
-import { Activity, ShieldCheck, WalletCards, type LucideIcon } from "lucide-react";
+import { Activity, WalletCards, type LucideIcon } from "lucide-react";
 
 interface VaultSummaryProps {
 	total: number;
@@ -22,6 +22,7 @@ export function VaultSummary({
 		value: string;
 		sub: string;
 		icon?: LucideIcon;
+		image?: string;
 		token?: boolean;
 	}> = [
 		{
@@ -40,7 +41,7 @@ export function VaultSummary({
 			label: "Aave supply APY",
 			value: `${supplyApy.toFixed(2)}%`,
 			sub: "Live USDe reserve",
-			icon: ShieldCheck,
+			image: "/images/aave.png",
 		},
 		{
 			label: "Hedge operator",
@@ -52,12 +53,14 @@ export function VaultSummary({
 
 	return (
 		<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-			{items.map(({ label, value, sub, icon: Icon, token }) => (
+			{items.map(({ label, value, sub, icon: Icon, image, token }) => (
 				<div key={label} className="rounded-xl border border-border-edge bg-card px-6 py-6">
 					<div className="flex items-center justify-between text-sm text-label-secondary">
 						<span>{label}</span>
 						{token ? (
 							<img src="/images/usde.png" alt="" className="h-5 w-5 object-contain" />
+						) : image ? (
+							<img src={image} alt="" className="h-5 w-5 object-contain" />
 						) : Icon ? (
 							<Icon className="h-4 w-4 text-label-accent" />
 						) : null}

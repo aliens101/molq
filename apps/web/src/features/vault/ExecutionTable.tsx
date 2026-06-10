@@ -8,7 +8,7 @@ export function ExecutionTable({ dashboard }: { dashboard: DashboardResponse | n
 			name: dashboard?.shieldMarket?.protocol ?? "Aave V3",
 			market: "USDe supply",
 			icon: ShieldCheck,
-			image: "/images/usde.png",
+			image: "/images/aave.png",
 			accent: "text-label-accent",
 			yield: `${dashboard?.shieldMarket?.estimatedSupplyApy.toFixed(2) ?? "0.00"}%`,
 			exposure: compactToken(dashboard?.shieldMarket?.totalAssets),

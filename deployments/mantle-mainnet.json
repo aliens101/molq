@@ -43,6 +43,14 @@
 			"owner": "0xFd735C02Afe8D539dFCde0D2fC7Aa4510306354C",
 			"treasury": "0xFd735C02Afe8D539dFCde0D2fC7Aa4510306354C",
 			"keeper": "0x3B4f0135465d444a5bD06Ab90fC59B73916C85F5",
+			"profitHardeningEvidence": {
+				"transactionHash": "0xeba1eefddbc4367f0e2e9f90fbb7edc60fbe62b075bfd034d93cf30aa9891ea2",
+				"blockNumber": 96477962,
+				"grossProfitUsde": "0.01",
+				"performanceFeeUsde": "0.001",
+				"netProfitUsde": "0.009",
+				"explorerUrl": "https://mantlescan.xyz/tx/0xeba1eefddbc4367f0e2e9f90fbb7edc60fbe62b075bfd034d93cf30aa9891ea2"
+			},
 			"treasuryMigrationTransactionHash": "0x279013ae8d63b9efcb713abd9a21037ec9a64ad074ccab6d30a7270595b73fc4",
 			"ownershipTransferTransactionHash": "0x1e862c1ce847b715fa070fdafc0fe19479af03946e08701e11505d7e4be367ef",
 			"ownershipAcceptanceTransactionHash": "0x636beeed9faf3c398306f5a835e5d60d922c4cdd65ff455c635f67b072cf5a1a",

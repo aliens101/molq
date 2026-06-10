@@ -9,6 +9,7 @@ model decisions and agent identity are recorded on Mantle.
 
 - Landing: https://molq.site
 - Dapp: https://app.molq.site
+- Documentation: publish from `apps/docs` through Mintlify
 - API health: https://api.molq.site/api/health
 - Ponder GraphQL: https://indexer.molq.site/graphql
 - Network: Mantle mainnet (`5000`)
@@ -68,6 +69,7 @@ profit is reported separately.
   execution, vault keeper, and operator routes.
 - `apps/indexer` - Ponder indexer and GraphQL API for vault events, ERC-8004
   identity, and on-chain decisions.
+- `apps/docs` - Mintlify user, protocol, API, and developer documentation.
 - `contracts` - Foundry contracts, deployment scripts, unit tests, and Mantle
   fork tests.
 - `packages/shared` - contract addresses, chain constants, and shared types.
@@ -118,12 +120,19 @@ Run the landing page separately with:
 pnpm landing
 ```
 
+Run the Mintlify documentation with:
+
+```sh
+pnpm docs
+```
+
 Default local endpoints:
 
 - Dapp: `http://localhost:5173`
 - Landing: `http://localhost:5174`
 - API: `http://localhost:8787`
 - Ponder: `http://localhost:42069`
+- Docs: `http://localhost:3000`
 
 Keep private keys and API credentials in untracked environment files. Never
 commit production secrets.
@@ -133,6 +142,7 @@ commit production secrets.
 ```sh
 pnpm build
 pnpm test
+pnpm docs:check
 pnpm format:check
 ```
 
@@ -146,11 +156,16 @@ Every push to `main`:
 
 1. Installs pnpm and pinned Foundry dependencies.
 2. Builds all applications and contracts.
-3. Runs the complete test suite.
-4. Connects to the VPS over SSH.
-5. Publishes versioned static landing and dapp releases.
-6. Recreates the MolQ PM2 API and indexer processes.
-7. Verifies local service health before completing.
+3. Validates Mintlify configuration and documentation links.
+4. Runs the complete test suite.
+5. Connects to the VPS over SSH.
+6. Publishes versioned static landing and dapp releases.
+7. Recreates the MolQ PM2 API and indexer processes.
+8. Verifies local service health before completing.
+
+Mintlify deploys `apps/docs` separately through its GitHub App. Configure the
+Mintlify project to use `aliens101/molq`, enable monorepo mode, and set the docs
+path to `/apps/docs`.
 
 The production deployment script is defensive and affects only the
 `molq-api` and `molq-indexer` PM2 processes.

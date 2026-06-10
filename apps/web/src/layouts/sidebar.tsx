@@ -1,6 +1,7 @@
 import {
 	Activity,
 	Bot,
+	BookOpen,
 	ExternalLink,
 	LayoutDashboard,
 	ShieldCheck,
@@ -69,6 +70,15 @@ export function Sidebar() {
 				>
 					View contract
 					<ExternalLink className="h-3.5 w-3.5" />
+				</a>
+				<a
+					href="https://docs.molq.site"
+					target="_blank"
+					rel="noreferrer"
+					className="mt-3 flex items-center gap-2 text-xs font-semibold text-label-accent"
+				>
+					<BookOpen className="h-3.5 w-3.5" />
+					Read documentation
 				</a>
 			</div>
 		</aside>

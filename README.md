@@ -9,7 +9,7 @@ model decisions and agent identity are recorded on Mantle.
 
 - Landing: https://molq.site
 - Dapp: https://app.molq.site
-- Documentation: publish from `apps/docs` through Mintlify
+- Documentation: https://docs.molq.site
 - API health: https://api.molq.site/api/health
 - Ponder GraphQL: https://indexer.molq.site/graphql
 - Network: Mantle mainnet (`5000`)

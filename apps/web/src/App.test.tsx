@@ -11,6 +11,7 @@ vi.mock("@/molq/use-molq-vault", () => ({
 		pendingAction: null,
 		error: null,
 		transactionHash: null,
+		transactionFlow: null,
 		totalAssets: 0n,
 		shieldAssets: 0n,
 		liquidAssets: 0n,
@@ -23,6 +24,7 @@ vi.mock("@/molq/use-molq-vault", () => ({
 		deposit: vi.fn(),
 		withdrawAll: vi.fn(),
 		refresh: vi.fn().mockResolvedValue(undefined),
+		closeTransactionFlow: vi.fn(),
 		formatUsde: (value: bigint) => String(value),
 	}),
 }));
@@ -100,4 +102,11 @@ test("renders the MolQ portfolio and deposit workflow", async () => {
 	expect(screen.getByRole("heading", { name: "Deposit" })).toBeInTheDocument();
 	expect(screen.getAllByRole("button", { name: /connect wallet/i })).toHaveLength(2);
 	expect(screen.getByRole("button", { name: /withdraw full position/i })).toBeDisabled();
+
+	fireEvent.click(screen.getByRole("button", { name: /get usde/i }));
+	expect(screen.getByRole("dialog", { name: /get usde on mantle/i })).toBeInTheDocument();
+	expect(screen.getByRole("link", { name: /stargate finance/i })).toHaveAttribute(
+		"href",
+		"https://stargate.finance/",
+	);
 });

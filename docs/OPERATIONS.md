@@ -17,12 +17,15 @@ Discord- or Slack-compatible webhook.
 pm2 status
 pm2 logs molq-api --lines 200
 pm2 logs molq-indexer --lines 200
+pm2 logs molq-agent --lines 200
 pm2 logs molq-monitor --lines 200
-pm2 restart molq-api molq-indexer molq-monitor
+pm2 restart molq-api molq-indexer molq-agent molq-monitor
 ```
 
-All three processes use automatic restart with exponential backoff. The API
-also handles `SIGTERM` and `SIGINT` with a bounded graceful shutdown.
+All four processes use automatic restart with exponential backoff. The
+autonomous agent runs separately from the HTTP API, so a slow model, RPC, or
+transaction receipt cannot block user requests. The agent worker is recycled
+every 30 minutes as an additional bound on stuck external operations.
 
 ## Ponder schema changes
 

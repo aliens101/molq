@@ -73,8 +73,8 @@ printf '%s\n' \
 	'fs.inotify.max_user_instances=8192' |
 	sudo tee /etc/sysctl.d/99-molq.conf >/dev/null
 sudo sysctl --system >/dev/null
-pm2 delete molq-api molq-indexer molq-monitor >/dev/null 2>&1 || true
-pm2 start "$REPO_DIR/deploy/ecosystem.config.cjs" --only molq-api,molq-indexer,molq-monitor
+pm2 delete molq-api molq-indexer molq-agent molq-monitor >/dev/null 2>&1 || true
+pm2 start "$REPO_DIR/deploy/ecosystem.config.cjs" --only molq-api,molq-indexer,molq-agent,molq-monitor
 pm2 save
 
 log "Removing old static releases"

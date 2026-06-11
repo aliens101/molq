@@ -1,3 +1,5 @@
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import type {
 	AgentDecision,
 	AgentPolicyDecision,
@@ -33,6 +35,9 @@ export interface AgentRuntimeStatus {
 export class AgentRuntime {
 	private running = false;
 	private readonly history: AgentExecutionReport[] = [];
+	private readonly historyPath = resolve(
+		process.env.MOLQ_AGENT_HISTORY_PATH ?? "data/agent-history.json",
+	);
 
 	constructor(
 		private readonly enabled: boolean,
@@ -58,7 +63,7 @@ export class AgentRuntime {
 		);
 	}
 
-	start(): NodeJS.Timeout | undefined {
+	start(keepAlive = false): NodeJS.Timeout | undefined {
 		if (!this.enabled || this.intervalMs <= 0) return undefined;
 		void this.run().catch((error) => {
 			console.error("MolQ initial agent cycle failed:", error);
@@ -68,11 +73,12 @@ export class AgentRuntime {
 				console.error("MolQ agent cycle failed:", error);
 			});
 		}, this.intervalMs);
-		timer.unref();
+		if (!keepAlive) timer.unref();
 		return timer;
 	}
 
 	async status(): Promise<AgentRuntimeStatus> {
+		await this.refreshHistory();
 		return {
 			enabled: this.enabled,
 			running: this.running,
@@ -84,7 +90,8 @@ export class AgentRuntime {
 		};
 	}
 
-	recentDecisions(): AgentDecision[] {
+	async recentDecisions(): Promise<AgentDecision[]> {
+		await this.refreshHistory();
 		return this.history.map(({ decision, decisionTransactionHash }) => ({
 			id: decision.id,
 			action: decision.action,
@@ -150,10 +157,34 @@ export class AgentRuntime {
 			report.completedAt = new Date().toISOString();
 			this.history.unshift(report);
 			this.history.splice(50);
+			await this.persistHistory();
 			return report;
 		} finally {
 			this.running = false;
 		}
+	}
+
+	private async persistHistory(): Promise<void> {
+		await mkdir(dirname(this.historyPath), { recursive: true });
+		const temporaryPath = `${this.historyPath}.${process.pid}.tmp`;
+		await writeFile(temporaryPath, JSON.stringify(this.history), "utf8");
+		await rename(temporaryPath, this.historyPath);
+	}
+
+	private async readHistory(): Promise<AgentExecutionReport[]> {
+		try {
+			const value = JSON.parse(await readFile(this.historyPath, "utf8")) as unknown;
+			return Array.isArray(value) ? (value as AgentExecutionReport[]).slice(0, 50) : [];
+		} catch (error) {
+			if ((error as NodeJS.ErrnoException).code === "ENOENT") return [];
+			console.error("Failed to read agent history:", error);
+			return [];
+		}
+	}
+
+	private async refreshHistory(): Promise<void> {
+		const persisted = await this.readHistory();
+		if (persisted.length > 0) this.history.splice(0, this.history.length, ...persisted);
 	}
 }
 

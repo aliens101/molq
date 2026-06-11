@@ -35,6 +35,22 @@ module.exports = {
 			time: true,
 		},
 		{
+			name: "molq-agent",
+			cwd: "/home/cuyvps/apps/molq/apps/api",
+			script: "./node_modules/.bin/tsx",
+			args: "src/agent-worker.ts",
+			interpreter: "none",
+			env: {
+				NODE_ENV: "production",
+			},
+			autorestart: true,
+			cron_restart: "*/30 * * * *",
+			max_memory_restart: "500M",
+			kill_timeout: 12000,
+			exp_backoff_restart_delay: 100,
+			time: true,
+		},
+		{
 			name: "molq-monitor",
 			cwd: "/home/cuyvps/apps/molq/apps/api",
 			script: "./node_modules/.bin/tsx",

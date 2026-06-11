@@ -27,6 +27,35 @@ export function createMolqServer(
 	agentRuntime = AgentRuntime.fromEnv(hedgeExecutor, vaultKeeper),
 	telemetry = TelemetryStore.fromEnv(),
 ) {
+	let dashboardCache:
+		| { value: Awaited<ReturnType<typeof withExecution>>; expiresAt: number }
+		| undefined;
+	let dashboardRefresh: Promise<Awaited<ReturnType<typeof withExecution>>> | undefined;
+	const loadDashboard = async () => {
+		const now = Date.now();
+		if (dashboardCache && dashboardCache.expiresAt > now) return dashboardCache.value;
+		if (!dashboardRefresh) {
+			dashboardRefresh = withExecution(hedgeExecutor)
+				.then((value) => {
+					dashboardCache = {
+						value,
+						expiresAt:
+							Date.now() + Number(process.env.MOLQ_DASHBOARD_CACHE_MS ?? 15_000),
+					};
+					return value;
+				})
+				.finally(() => {
+					dashboardRefresh = undefined;
+				});
+		}
+		try {
+			return await dashboardRefresh;
+		} catch (error) {
+			if (dashboardCache) return dashboardCache.value;
+			throw error;
+		}
+	};
+
 	return createServer(async (request, response) => {
 		setSecurityHeaders(request, response);
 
@@ -52,7 +81,7 @@ export function createMolqServer(
 
 			if (request.method === "GET" && path === "/api/dashboard") {
 				const [dashboard, realizedProfit] = await Promise.all([
-					withExecution(hedgeExecutor),
+					loadDashboard(),
 					telemetry.realizedProfitUsd(),
 				]);
 				dashboard.portfolio.realizedProfit = realizedProfit;
@@ -61,7 +90,7 @@ export function createMolqServer(
 				});
 				sendJson(response, 200, {
 					...dashboard,
-					decisions: agentRuntime.recentDecisions(),
+					decisions: await agentRuntime.recentDecisions(),
 				});
 				return;
 			}
